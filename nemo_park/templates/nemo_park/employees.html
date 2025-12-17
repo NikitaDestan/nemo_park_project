@@ -1,0 +1,69 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Сотрудники{% endblock %}
+
+{% block content %}
+<h2>👥 Список сотрудников</h2>
+
+<table>
+    <tr>
+        <th>Имя</th>
+        <th>Фамилия</th>
+        <th>Должность</th>
+        <th>Зарплата</th>
+        <th>Телефон</th>
+        <th>Email</th>
+        <th>Дата регистрации</th>
+        <th>Логин</th>
+        <th>Статус</th>
+        <th>Действия</th>
+    </tr>
+    {% for employee in employees %}
+    <tr>
+        <td>{{ employee.first_name }}</td>
+        <td>{{ employee.last_name }}</td>
+        <td>{{ employee.get_position_display }}</td>
+        <td>
+            {% if employee.position == 'user' %}
+                <span style="color: #999;">-</span>
+            {% else %}
+                {{ employee.salary }} руб.
+            {% endif %}
+        </td>
+        <td>{{ employee.phone|default:"-" }}</td>
+        <td>{{ employee.email|default:"-" }}</td>
+        <td>{{ employee.hire_date|date:"d.m.Y" }}</td>
+        <td>
+            {% if employee.customuser %}
+                {{ employee.customuser.username }}
+            {% else %}
+                <span style="color: #999;">Нет логина</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if employee.position == 'user' %}
+                <span style="color: #ff6b00;">⏳ Ожидает</span>
+            {% else %}
+                <span style="color: #28a745;">✅ Активен</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if user.role == 'admin' %}
+            <a href="{% url 'edit_employee' employee.id %}" style="color: #007cba; text-decoration: none;">✏️</a>
+            <a href="{% url 'delete_employee' employee.id %}" style="color: #dc3545; text-decoration: none; margin-left: 10px;">🗑️</a>
+            {% else %}
+            <span style="color: #999;">Только просмотр</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="10" style="text-align: center;">Нет сотрудников</td>
+    </tr>
+    {% endfor %}
+</table>
+<br>
+{% if user.role == 'admin' %}
+<a href="{% url 'add_employee' %}">➕ Добавить сотрудника</a>
+{% endif %}
+{% endblock %}

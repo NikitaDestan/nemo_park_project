@@ -1,0 +1,39 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Билеты{% endblock %}
+
+{% block content %}
+<h2>🎫 Список билетов</h2>
+
+<table>
+    <tr>
+        <th>Посетитель</th>
+        <th>Тип билета</th>
+        <th>Цена</th>
+        <th>Дата покупки</th>
+        <th>Действителен до</th>
+        <th>Кассир</th>
+        <th>Действия</th>
+    </tr>
+    {% for ticket in tickets %}
+    <tr>
+        <td>{{ ticket.visitor.first_name }} {{ ticket.visitor.last_name }}</td>
+        <td>{{ ticket.get_ticket_type_display }}</td>
+        <td>{{ ticket.price }} руб.</td>
+        <td>{{ ticket.purchase_date|date:"d.m.Y H:i" }}</td>
+        <td>{{ ticket.valid_date|date:"d.m.Y" }}</td>
+        <td>{{ ticket.cashier.username }}</td>
+        <td>
+            <a href="{% url 'edit_ticket' ticket.id %}" style="color: #007cba; text-decoration: none;">✏️</a>
+            <a href="{% url 'delete_ticket' ticket.id %}" style="color: #dc3545; text-decoration: none; margin-left: 10px;">🗑️</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="7" style="text-align: center;">Нет билетов</td>
+    </tr>
+    {% endfor %}
+</table>
+<br>
+<a href="{% url 'add_ticket' %}">➕ Продать новый билет</a>
+{% endblock %}

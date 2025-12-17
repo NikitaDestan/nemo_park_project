@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ожидание подтверждения - Аквапарк</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: linear-gradient(135deg, #007cba, #00bcd4); 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .waiting-container { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 10px; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 500px; 
+            text-align: center;
+        }
+        .icon { 
+            font-size: 64px; 
+            margin-bottom: 20px; 
+        }
+        .message { 
+            margin: 20px 0; 
+            line-height: 1.6;
+        }
+        .logout-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007cba;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .logout-btn:hover {
+            background: #005a87;
+        }
+    </style>
+</head>
+<body>
+    <div class="waiting-container">
+        <div class="icon">⏳</div>
+        <h2>Ожидание назначения роли</h2>
+        
+        <div class="message">
+            <p><strong>Привет, {{ user.username }}!</strong></p>
+            <p>Ваша учетная запись успешно зарегистрирована, но пока не имеет назначенной роли.</p>
+            <p>Ожидайте, пока администратор назначит вам роль (Кассир или Администратор).</p>
+            <p>После назначения роли вы получите доступ к функционалу системы.</p>
+        </div>
+        
+        <div class="contact-info">
+            <p>Если прошло более 24 часов, свяжитесь с администратором:</p>
+            <p><strong>📧 admin@aquapark.ru</strong></p>
+            <p><strong>📞 +7 (999) 123-45-67</strong></p>
+        </div>
+        
+        <a href="{% url 'logout' %}" class="logout-btn">Выйти из системы</a>
+    </div>
+</body>
+</html>

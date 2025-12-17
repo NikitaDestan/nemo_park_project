@@ -1,0 +1,36 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Редактировать посетителя{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <h2>✏️ Редактировать посетителя: {{ visitor.first_name }} {{ visitor.last_name }}</h2>
+    
+    <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: red; font-size: 14px; margin-top: 5px;">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    💾 Сохранить изменения
+                </button>
+                <a href="{% url 'visitors' %}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
+                    ↩️ Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

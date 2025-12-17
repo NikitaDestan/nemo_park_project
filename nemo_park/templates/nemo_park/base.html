@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <title>Парк Немо - {% block title %}Главная{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="manifest" href="{% static 'site.webmanifest' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
+</head>
+<body style="padding: 20px; background-color: #f5f5f5;">
+    <div class="header">
+        <h1>🐠🎢 Парк развлечений «Немо»</h1>
+        <div class="user-info">
+            {% if user.is_authenticated %}
+                Привет, <strong>{{ user.username }}</strong> 
+                {% if user.role != 'user' %}
+                    ({{ user.get_role_display }})
+                {% endif %}
+                | <a href="{% url 'logout' %}" style="color: white;">Выйти</a>
+            {% else %}
+                <a href="{% url 'login' %}" style="color: white;">Войти</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if user.is_authenticated and user.role != 'user' %}
+    <div class="nav">
+        <a href="{% url 'dashboard' %}">📊 Главная</a>
+        {% if user.role == 'admin' %}
+            <a href="{% url 'employees' %}">👥 Сотрудники</a>
+            <a href="{% url 'visitors' %}">👤 Посетители</a>
+        {% endif %}
+        <a href="{% url 'tickets' %}">🎫 Билеты</a>
+        {% if user.role == 'admin' %}
+            <a href="/admin/">⚙️ Панель администратора</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

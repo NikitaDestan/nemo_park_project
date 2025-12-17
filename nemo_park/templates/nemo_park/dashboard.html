@@ -1,0 +1,53 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<h2>📊 Статистика аквапарка</h2>
+
+<div class="stats">
+    {% if user.role == 'admin' %}
+    <div class="stat-card">
+        <h3>👥 Сотрудники</h3>
+        <p style="font-size: 24px; font-weight: bold; color: #007cba;">{{ employees_count }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>👤 Посетители</h3>
+        <p style="font-size: 24px; font-weight: bold; color: #28a745;">{{ visitors_count }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>🎫 Билеты</h3>
+        <p style="font-size: 24px; font-weight: bold; color: #dc3545;">{{ tickets_count }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>💰 Общая выручка</h3>
+        <p style="font-size: 24px; font-weight: bold; color: #ff6b00;">{{ total_revenue }} руб.</p>
+    </div>
+    
+    {% elif user.role == 'cashier' %}
+    <div class="stat-card">
+        <h3>👤 Всего посетителей</h3>
+        <p style="font-size: 24px; font-weight: bold; color: #28a745;">{{ visitors_count }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>🎫 Продано билетов</h3>
+        <p style="font-size: 24px; font-weight: bold; color: #dc3545;">{{ tickets_count }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>💰 Ваша выручка</h3>
+        <p style="font-size: 24px; font-weight: bold; color: #ff6b00;">{{ personal_revenue }} руб.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% if user.is_authenticated and user.role != 'user' %}
+<div class="nav">
+    <h3>🚀 Быстрые действия:</h3>
+    {% if user.role == 'admin' %}
+        <a href="{% url 'add_employee' %}">➕ Добавить сотрудника</a> |
+        <a href="{% url 'add_visitor' %}">➕ Добавить посетителя</a> |
+    {% endif %}
+    <a href="{% url 'add_ticket' %}">🎫 Продать билет</a>
+</div>
+{% endif %}
+{% endblock %}

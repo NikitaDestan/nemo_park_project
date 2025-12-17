@@ -1,0 +1,46 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Продать билет{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <h2>🎫 Продать билет</h2>
+    
+    <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: red; font-size: 14px; margin-top: 5px;">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <h4>💰 Цены на билеты:</h4>
+                <ul style="margin: 0;">
+                    <li>Взрослый: 1,500 руб.</li>
+                    <li>Детский: 800 руб.</li>
+                    <li>Семейный: 3,500 руб.</li>
+                    <li>VIP: 5,000 руб.</li>
+                </ul>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    🎫 Продать билет
+                </button>
+                <a href="{% url 'tickets' %}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
+                    ↩️ Назад
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

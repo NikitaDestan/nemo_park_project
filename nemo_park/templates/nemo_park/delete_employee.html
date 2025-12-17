@@ -1,0 +1,32 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Удалить сотрудника{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+    <h2>🗑️ Удалить сотрудника</h2>
+    
+    <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px;">
+        <h3 style="color: #c62828;">⚠️ Внимание!</h3>
+        <p>Вы собираетесь удалить сотрудника: <strong>{{ employee.first_name }} {{ employee.last_name }}</strong></p>
+        
+        {% if employee.customuser %}
+        <p>Также будет удален пользователь: <strong>{{ employee.customuser.username }}</strong></p>
+        {% endif %}
+        
+        <p style="color: #c62828;">Это действие нельзя отменить!</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    🗑️ Удалить навсегда
+                </button>
+                <a href="{% url 'employees' %}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
+                    ↩️ Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

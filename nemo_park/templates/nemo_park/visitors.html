@@ -1,0 +1,43 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Посетители{% endblock %}
+
+{% block content %}
+<h2>👤 Список посетителей</h2>
+
+<table>
+    <tr>
+        <th>Имя</th>
+        <th>Фамилия</th>
+        <th>Email</th>
+        <th>Телефон</th>
+        <th>Дата регистрации</th>
+        <th>Действия</th>
+    </tr>
+    {% for visitor in visitors %}
+    <tr>
+        <td>{{ visitor.first_name }}</td>
+        <td>{{ visitor.last_name }}</td>
+        <td>{{ visitor.email }}</td>
+        <td>{{ visitor.phone }}</td>
+        <td>{{ visitor.registration_date|date:"d.m.Y H:i" }}</td>
+        <td>
+            {% if user.role == 'admin' %}
+            <a href="{% url 'edit_visitor' visitor.id %}" style="color: #007cba; text-decoration: none;">✏️</a>
+            <a href="{% url 'delete_visitor' visitor.id %}" style="color: #dc3545; text-decoration: none; margin-left: 10px;">🗑️</a>
+            {% else %}
+            <span style="color: #999;">Только просмотр</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6" style="text-align: center;">Нет посетителей</td>
+    </tr>
+    {% endfor %}
+</table>
+<br>
+{% if user.role == 'admin' %}
+<a href="{% url 'add_visitor' %}">➕ Добавить посетителя</a>
+{% endif %}
+{% endblock %}

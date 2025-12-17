@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <title>Вход - Аквапарк</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="manifest" href="{% static 'site.webmanifest' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
+</head>
+<body  style="padding: 20px; background: linear-gradient(45deg,rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+    <div class="login-container">
+        <h2 style="text-align: center; color: #007cba;">🏊 Вход в систему</h2>
+        
+        <div class="messages">
+            {% for message in messages %}
+                {% if message.tags == 'error' %}  
+                <div class="error">
+                    {{ message }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username">Логин:</label>
+                {{ form.username }}
+            </div>
+            <div class="form-group">
+                <label for="id_password">Пароль:</label>
+                {{ form.password }}
+            </div>
+            <button type="submit">Войти</button>
+        </form>
+        
+        <div class="register-link">
+            <p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a></p>
+        </div>
+    </div>
+</body>
+</html>
