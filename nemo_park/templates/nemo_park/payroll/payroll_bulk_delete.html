@@ -1,0 +1,80 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Массовое удаление{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">🗑️ Массовое удаление расчётных листов</div>
+</div>
+
+<div class="form-container">
+    <div class="alert alert-warning" style="text-align: center; margin-bottom: 25px;">
+        ⚠️ <strong>Внимание!</strong> Это действие нельзя отменить!
+    </div>
+    
+    <!-- Статистика -->
+    <div style="background: #f8f9fa; border-radius: 15px; padding: 20px; margin-bottom: 25px;">
+        <h4 style="margin-bottom: 15px; text-align: center;">📊 Текущая статистика</h4>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
+            <div style="background: white; padding: 15px; border-radius: 10px;">
+                <div style="font-size: 2rem; font-weight: 700; color: #023E8A;">{{ total_count }}</div>
+                <div style="color: #666;">Всего</div>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 10px;">
+                <div style="font-size: 2rem; font-weight: 700; color: #f39c12;">{{ draft_count }}</div>
+                <div style="color: #666;">Черновиков</div>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 10px;">
+                <div style="font-size: 2rem; font-weight: 700; color: #00b894;">{{ paid_count }}</div>
+                <div style="color: #666;">Выплаченных</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Кнопки удаления -->
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+        
+        <!-- Удалить черновики -->
+        {% if draft_count > 0 %}
+        <form method="post" onsubmit="return confirm('Удалить {{ draft_count }} черновиков?');">
+            {% csrf_token %}
+            <input type="hidden" name="delete_type" value="draft">
+            <button type="submit" class="btn btn-warning" style="width: 100%; padding: 15px;">
+                📝 Удалить все черновики ({{ draft_count }} шт.)
+            </button>
+        </form>
+        {% endif %}
+        
+        <!-- Удалить выплаченные -->
+        {% if paid_count > 0 %}
+        <form method="post" onsubmit="return confirm('Удалить {{ paid_count }} выплаченных листов? Это очистит историю выплат!');">
+            {% csrf_token %}
+            <input type="hidden" name="delete_type" value="paid">
+            <button type="submit" class="btn" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); color: white;">
+                ✅ Удалить все выплаченные ({{ paid_count }} шт.)
+            </button>
+        </form>
+        {% endif %}
+        
+        <!-- Удалить всё -->
+        {% if total_count > 0 %}
+        <form method="post" onsubmit="return confirm('🚨 УДАЛИТЬ ВСЕ {{ total_count }} РАСЧЁТНЫХ ЛИСТОВ? Это действие нельзя отменить!');">
+            {% csrf_token %}
+            <input type="hidden" name="delete_type" value="all">
+            <button type="submit" class="btn btn-danger" style="width: 100%; padding: 15px;">
+                💀 Удалить ВСЁ ({{ total_count }} шт.)
+            </button>
+        </form>
+        {% else %}
+        <div style="text-align: center; padding: 30px; color: #999;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">📭</div>
+            <p>Расчётных листов нет</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="buttons-center" style="margin-top: 30px;">
+        <a href="{% url 'payroll_list' %}" class="btn btn-secondary">← Отмена</a>
+    </div>
+</div>
+{% endblock %}

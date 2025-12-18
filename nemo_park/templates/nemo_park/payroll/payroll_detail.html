@@ -1,0 +1,100 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Расчётный лист{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">📋 Расчётный лист #{{ payroll.pk }}</div>
+</div>
+
+<div class="cards-grid">
+    <!-- Информация о сотруднике -->
+    <div class="info-card">
+        <div class="info-card-header blue">
+            <h3 style="margin: 0;">👤 {{ payroll.employee.full_name }}</h3>
+            <p style="margin: 5px 0 0 0; opacity: 0.9;">{{ payroll.employee.get_position_display }}</p>
+        </div>
+        <div class="info-card-body">
+            <p><strong>📅 Период:</strong> {{ payroll.period_start|date:"d.m.Y" }} — {{ payroll.period_end|date:"d.m.Y" }}</p>
+            <p><strong>🕐 График:</strong> {{ payroll.employee.work_start|time:"H:i" }} - {{ payroll.employee.work_end|time:"H:i" }}</p>
+            <p><strong>📆 Рабочие дни:</strong> {{ payroll.employee.work_days_display }}</p>
+            <p><strong>💵 Ставка:</strong> {{ payroll.employee.hourly_rate }} ₽/час</p>
+            <p><strong>📊 Статус:</strong> 
+                {% if payroll.status == 'paid' %}
+                    <span class="badge" style="background: #00b894; color: white;">✅ Выплачено</span>
+                {% elif payroll.status == 'confirmed' %}
+                    <span class="badge" style="background: #0077B6; color: white;">📋 Подтверждён</span>
+                {% else %}
+                    <span class="badge" style="background: #f39c12; color: white;">⏳ Черновик</span>
+                {% endif %}
+            </p>
+            {% if payroll.paid_at %}
+            <p><strong>💳 Дата выплаты:</strong> {{ payroll.paid_at|date:"d.m.Y H:i" }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Расчёт -->
+    <div class="info-card">
+        <div class="info-card-header green">
+            <h3 style="margin: 0;">💰 Расчёт</h3>
+        </div>
+        <div class="info-card-body">
+            <table style="width: 100%;">
+                <tr>
+                    <td>⏱️ Всего часов</td>
+                    <td style="text-align: right;"><strong>{{ payroll.total_hours|floatformat:1 }}ч</strong></td>
+                </tr>
+                {% if payroll.overtime_hours > 0 %}
+                <tr>
+                    <td>🔥 Переработка</td>
+                    <td style="text-align: right;">{{ payroll.overtime_hours|floatformat:1 }}ч</td>
+                </tr>
+                {% endif %}
+                <tr style="border-top: 1px solid #eee;">
+                    <td>💰 Базовая оплата</td>
+                    <td style="text-align: right;">{{ payroll.base_salary|floatformat:0 }} ₽</td>
+                </tr>
+                {% if payroll.overtime_pay > 0 %}
+                <tr>
+                    <td>🔥 За переработку</td>
+                    <td style="text-align: right;">{{ payroll.overtime_pay|floatformat:0 }} ₽</td>
+                </tr>
+                {% endif %}
+                {% if payroll.bonus > 0 %}
+                <tr>
+                    <td>🎁 Премия</td>
+                    <td style="text-align: right;">{{ payroll.bonus|floatformat:0 }} ₽</td>
+                </tr>
+                {% endif %}
+                <tr style="border-top: 2px solid #eee;">
+                    <td><strong>📊 Начислено</strong></td>
+                    <td style="text-align: right;"><strong>{{ payroll.gross_salary|floatformat:0 }} ₽</strong></td>
+                </tr>
+                <tr style="color: #e74c3c;">
+                    <td>📉 НДФЛ (13%)</td>
+                    <td style="text-align: right;">-{{ payroll.ndfl_tax|floatformat:0 }} ₽</td>
+                </tr>
+                <tr style="background: #e8f5e9; font-size: 1.2rem;">
+                    <td><strong>💵 К выплате</strong></td>
+                    <td style="text-align: right;"><strong>{{ payroll.net_salary|floatformat:0 }} ₽</strong></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Кнопки -->
+<div class="buttons-center" style="margin-top: 25px;">
+    {% if payroll.status != 'paid' and user.role == 'admin' %}
+    <form method="post" action="{% url 'payroll_mark_paid' payroll.pk %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">💳 Отметить как выплачено</button>
+    </form>
+    {% endif %}
+    {% if user.role == 'admin' %}
+    <a href="{% url 'payroll_delete' payroll.pk %}" class="btn btn-danger">🗑️ Удалить</a>
+    {% endif %}
+    <a href="{% url 'payroll_list' %}" class="btn btn-secondary">← К списку</a>
+</div>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Добавить сотрудника{% endblock %}
+
+{% block content %}
+<div class="page-title">➕ Добавить сотрудника</div>
+
+<div class="form-container">
+    <form method="post">
+        {% csrf_token %}
+        
+        <h3 style="margin: 0 0 20px; color: #023E8A;">👤 Личные данные</h3>
+        
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>Имя *</label>
+                {{ form.first_name }}
+            </div>
+            <div class="form-group">
+                <label>Фамилия *</label>
+                {{ form.last_name }}
+            </div>
+        </div>
+        
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>Должность *</label>
+                {{ form.position }}
+            </div>
+            <div class="form-group">
+                <label>Ставка ₽/час</label>
+                {{ form.hourly_rate }}
+                <small style="color: #666;">Оставьте 0 для автоматической ставки по должности</small>
+            </div>
+        </div>
+        
+        <h3 style="margin: 25px 0 15px; color: #023E8A;">🕐 График работы</h3>
+        
+        <!-- Информационный блок про переработку -->
+        <div style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #0077B6;">
+            <strong style="color: #023E8A;">💡 Как рассчитывается зарплата:</strong>
+            <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #555;">
+                <li><strong>Стандартный день = 8 часов</strong></li>
+                <li>Если смена <strong>≤ 8 часов</strong> — обычная ставка</li>
+                <li>Если смена <strong>> 8 часов</strong> — переработка оплачивается <strong>×1.5</strong></li>
+            </ul>
+            <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 8px; font-size: 0.9rem;">
+                <strong>Пример:</strong> 09:00-18:00 (перерыв 1ч) = <span style="color: #00b894;">8ч ✓ стандарт</span><br>
+                <strong>Пример:</strong> 10:00-20:00 (перерыв 1ч) = <span style="color: #f39c12;">9ч = 8ч + 1ч переработки</span>
+            </div>
+        </div>
+        
+        <div class="form-grid-3">
+            <div class="form-group">
+                <label>Начало дня</label>
+                {{ form.work_start }}
+            </div>
+            <div class="form-group">
+                <label>Конец дня</label>
+                {{ form.work_end }}
+            </div>
+            <div class="form-group">
+                <label>Перерыв (мин)</label>
+                {{ form.break_minutes }}
+            </div>
+        </div>
+        
+        <!-- Калькулятор часов -->
+        <div id="hours-calculator" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: none;">
+            <span style="font-size: 1.1rem;">
+                ⏱️ Рабочих часов в день: <strong id="calc-hours">0</strong>
+                <span id="overtime-badge" style="display: none; margin-left: 10px; background: #f39c12; color: white; padding: 3px 10px; border-radius: 15px; font-size: 0.85rem;">
+                    🔥 Переработка: <span id="calc-overtime">0</span>ч
+                </span>
+            </span>
+        </div>
+        
+        <div class="form-group">
+            <label>Рабочие дни</label>
+            {{ form.work_days }}
+            <small style="color: #666;">Введите номера дней через запятую: 1=Пн, 2=Вт, 3=Ср, 4=Чт, 5=Пт, 6=Сб, 7=Вс</small>
+        </div>
+        
+        <!-- Быстрый выбор дней -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+            <button type="button" class="btn btn-secondary" onclick="setWorkDays('1,2,3,4,5')" style="padding: 8px 15px;">
+                📅 Пн-Пт
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="setWorkDays('1,2,3,4,5,6')" style="padding: 8px 15px;">
+                📅 Пн-Сб
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="setWorkDays('2,3,4,5,6')" style="padding: 8px 15px;">
+                📅 Вт-Сб
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="setWorkDays('3,4,5,6,7')" style="padding: 8px 15px;">
+                📅 Ср-Вс
+            </button>
+        </div>
+        
+        <h3 style="margin: 25px 0 15px; color: #023E8A;">📞 Контакты</h3>
+        
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>Телефон</label>
+                {{ form.phone }}
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                {{ form.email }}
+            </div>
+        </div>
+        
+        <h3 style="margin: 25px 0 15px; color: #023E8A;">🔑 Учётная запись</h3>
+        
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>Логин *</label>
+                {{ form.username }}
+            </div>
+            <div class="form-group">
+                <label>Пароль *</label>
+                {{ form.password }}
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+            <button type="submit" class="btn btn-success">✅ Создать сотрудника</button>
+            <a href="{% url 'employees' %}" class="btn btn-secondary">← Отмена</a>
+        </div>
+    </form>
+</div>
+
+<script>
+function setWorkDays(days) {
+    document.getElementById('id_work_days').value = days;
+}
+
+// Калькулятор часов в реальном времени
+function calculateHours() {
+    var startInput = document.getElementById('id_work_start');
+    var endInput = document.getElementById('id_work_end');
+    var breakInput = document.getElementById('id_break_minutes');
+    var calculator = document.getElementById('hours-calculator');
+    var hoursSpan = document.getElementById('calc-hours');
+    var overtimeBadge = document.getElementById('overtime-badge');
+    var overtimeSpan = document.getElementById('calc-overtime');
+    
+    if (!startInput.value || !endInput.value) {
+        calculator.style.display = 'none';
+        return;
+    }
+    
+    var start = startInput.value.split(':');
+    var end = endInput.value.split(':');
+    var breakMin = parseInt(breakInput.value) || 60;
+    
+    var startMinutes = parseInt(start[0]) * 60 + parseInt(start[1]);
+    var endMinutes = parseInt(end[0]) * 60 + parseInt(end[1]);
+    
+    // Если конец раньше начала — ночная смена
+    if (endMinutes <= startMinutes) {
+        endMinutes += 24 * 60;
+    }
+    
+    var totalMinutes = endMinutes - startMinutes - breakMin;
+    var hours = (totalMinutes / 60).toFixed(1);
+    
+    calculator.style.display = 'block';
+    hoursSpan.textContent = hours;
+    hoursSpan.style.color = hours > 8 ? '#f39c12' : '#00b894';
+    
+    if (hours > 8) {
+        var overtime = (hours - 8).toFixed(1);
+        overtimeSpan.textContent = overtime;
+        overtimeBadge.style.display = 'inline';
+    } else {
+        overtimeBadge.style.display = 'none';
+    }
+}
+
+// Слушаем изменения
+document.getElementById('id_work_start').addEventListener('change', calculateHours);
+document.getElementById('id_work_end').addEventListener('change', calculateHours);
+document.getElementById('id_break_minutes').addEventListener('input', calculateHours);
+
+// Начальный расчёт
+calculateHours();
+</script>
+{% endblock %}

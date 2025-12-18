@@ -1,0 +1,77 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Массовый расчёт{% endblock %}
+
+{% block content %}
+<div class="page-title">📊 Массовый расчёт зарплаты</div>
+
+<!-- Форма -->
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 20px; margin-bottom: 25px; color: white; max-width: 600px;">
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 20px; align-items: end;">
+            <div>
+                <label style="display: block; margin-bottom: 8px;">📅 Начало периода</label>
+                {{ form.period_start }}
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 8px;">📅 Конец периода</label>
+                {{ form.period_end }}
+            </div>
+            <div>
+                <button type="submit" class="btn btn-warning">🧮 Рассчитать всех</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Результаты -->
+{% if results %}
+<div style="background: #e8f5e9; padding: 15px 20px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+    <div>
+        <strong>📊 Итого:</strong> 
+        Начислено: <span style="color: #0077B6; font-weight: 700;">{{ total_gross|floatformat:0 }} ₽</span> | 
+        К выплате: <span style="color: #00b894; font-weight: 700;">{{ total_net|floatformat:0 }} ₽</span>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="period_start" value="{{ form_data.period_start|date:'Y-m-d' }}">
+        <input type="hidden" name="period_end" value="{{ form_data.period_end|date:'Y-m-d' }}">
+        <button type="submit" name="create_all" class="btn btn-success">✅ Создать все расчётные листы</button>
+    </form>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>👤 Сотрудник</th>
+                <th>💼 Должность</th>
+                <th>⏱️ Часов</th>
+                <th>🔥 Переработка</th>
+                <th>💵 Начислено</th>
+                <th>📉 НДФЛ</th>
+                <th>💰 К выплате</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in results %}
+            <tr>
+                <td><strong>{{ r.employee.full_name }}</strong></td>
+                <td><span class="badge badge-{{ r.employee.position }}">{{ r.employee.get_position_display }}</span></td>
+                <td>{{ r.total_hours|floatformat:1 }}ч</td>
+                <td>{{ r.overtime_hours|floatformat:1 }}ч</td>
+                <td>{{ r.gross_salary|floatformat:0 }} ₽</td>
+                <td style="color: #e74c3c;">-{{ r.ndfl_tax|floatformat:0 }} ₽</td>
+                <td><strong style="color: #00b894;">{{ r.net_salary|floatformat:0 }} ₽</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div style="margin-top: 20px;">
+    <a href="{% url 'payroll_list' %}" class="btn btn-secondary">← Назад к списку</a>
+</div>
+{% endblock %}

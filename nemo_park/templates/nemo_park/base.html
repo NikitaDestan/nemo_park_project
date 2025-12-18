@@ -32,6 +32,235 @@
             background-attachment: fixed;
             overflow-x: hidden;
         }
+        .content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    animation: scaleIn 0.2s ease-out 0.1s both;
+    min-height: 400px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Центровка форм */
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-container-wide {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Красивые формы */
+.form-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 30px;
+    border-radius: 20px;
+    color: white;
+    margin-bottom: 25px;
+}
+
+.form-card label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.form-card .form-control,
+.form-card .form-select {
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 1rem;
+    width: 100%;
+    color: #333;
+}
+
+.form-card .form-control:focus,
+.form-card .form-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+/* Сетка форм */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: end;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+/* Центровка заголовка страницы */
+.page-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.page-header .page-title {
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+/* Центровка статистики */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Центровка кнопок */
+.buttons-center {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.buttons-left {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+/* Улучшенная таблица */
+.table-container {
+    overflow-x: auto;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Результат расчёта */
+.result-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.result-card-header {
+    background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+    color: white;
+    padding: 20px;
+}
+
+.result-card-body {
+    padding: 25px;
+}
+
+/* Карточки в сетке */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.info-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.info-card-header {
+    padding: 20px;
+    color: white;
+}
+
+.info-card-header.blue {
+    background: linear-gradient(135deg, #0077B6 0%, #023E8A 100%);
+}
+
+.info-card-header.green {
+    background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+}
+
+/* Исправление таблиц внутри карточек */
+.info-card-body table th {
+    background: #f8f9fa;
+    color: #333;
+    padding: 10px;
+    font-weight: 600;
+}
+
+.info-card-body table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.info-card-body table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Итоговая строка */
+.summary-bar {
+    background: #e8f5e9;
+    padding: 15px 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Пустое состояние */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 15px;
+}
+
+/* Адаптивность для форм */
+@media (max-width: 768px) {
+    .form-grid-2,
+    .form-grid-3 {
+        grid-template-columns: 1fr;
+    }
+    
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
 
         /* ========== PARTICLES.JS ФОН ========== */
         #particles-js {
@@ -132,6 +361,9 @@
             border-radius: 25px;
             transition: all 0.2s ease;
         }
+        .stat-card.purple {
+    background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+}
 
         .user-info a:hover {
             background: #FF6B35;
@@ -539,19 +771,24 @@
             </div>
         </div>
 
-        <!-- Навигация -->
-        {% if user.is_authenticated and user.role != 'user' %}
+        
+<!-- Навигация -->
+{% if user.is_authenticated and user.role != 'user' %}
 <div class="nav">
     <a href="{% url 'dashboard' %}">📊 Главная</a>
     {% if user.role == 'admin' %}
         <a href="{% url 'employees' %}">👥 Сотрудники</a>
         <a href="{% url 'visitors' %}">👤 Посетители</a>
+        <a href="{% url 'payroll_list' %}">💰 Зарплата</a>
+    {% else %}
+        <a href="{% url 'my_payroll' %}">💰 Моя зарплата</a>
     {% endif %}
     <a href="{% url 'tickets' %}">🎫 Билеты</a>
     <a href="{% url 'products' %}">🍕 Меню</a>
     <a href="{% url 'orders' %}">🛒 Заказы</a>
+    <a href="{% url 'orders_analytics' %}">📈 Аналитика</a>  <!-- ВОТ ЭТА СТРОКА -->
     {% if user.role == 'admin' %}
-        <a href="/admin/">⚙️ Админ-панель</a>
+        <a href="/admin/">⚙️ Админка</a>
     {% endif %}
 </div>
 {% endif %}

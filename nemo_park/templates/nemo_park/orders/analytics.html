@@ -1,0 +1,160 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Аналитика{% endblock %}
+
+{% block content %}
+
+<style>
+  .a-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+  .a-card-head { padding: 20px; color: #fff; }
+  .a-card-body { padding: 20px; }
+
+  .a-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    gap: 12px;
+  }
+  .a-row:last-child { border-bottom: none; }
+
+  .a-date { color: #333; }
+  .a-badge { color: #fff; padding: 3px 10px; border-radius: 15px; font-size: .9rem; }
+  .a-money { color: #00b894; font-weight: 800; }
+  .a-muted { color: #888; }
+</style>
+
+<div class="page-header">
+    <div class="page-title">📊 Аналитика продаж</div>
+</div>
+
+<p style="color: #666; margin-bottom: 25px;">
+    Период: {{ start_date|date:"d.m.Y" }} — {{ end_date|date:"d.m.Y" }} (последние 30 дней)
+</p>
+
+<!-- Общая статистика -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">🛒</div>
+        <div class="stat-number">{{ total_orders.count|default:0 }}</div>
+        <div class="stat-label">Заказов</div>
+    </div>
+    <div class="stat-card orange">
+        <div class="stat-icon">🍕</div>
+        <div class="stat-number">{{ total_orders.revenue|floatformat:0|default:0 }} ₽</div>
+        <div class="stat-label">Выручка заказов</div>
+    </div>
+    <div class="stat-card purple">
+        <div class="stat-icon">🎫</div>
+        <div class="stat-number">{{ total_tickets.count|default:0 }}</div>
+        <div class="stat-label">Билетов</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon">💵</div>
+        <div class="stat-number">{{ total_tickets.revenue|floatformat:0|default:0 }} ₽</div>
+        <div class="stat-label">Выручка билетов</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-top: 30px;">
+    
+    <!-- Заказы по дням -->
+    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+        <div style="background: linear-gradient(135deg, #0077B6 0%, #023E8A 100%); padding: 20px;">
+            <h3 style="margin: 0; color: white;">🛒 Заказы по дням</h3>
+        </div>
+        <div style="padding: 20px; max-height: 400px; overflow-y: auto;">
+            {% for day in orders_by_day reversed %}
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee;">
+                <span style="color: #333;">{{ day.day|date:"d.m.Y" }}</span>
+                <span style="background: #0077B6; color: white; padding: 3px 10px; border-radius: 15px; font-size: 0.9rem;">
+                    {{ day.count }} шт.
+                </span>
+                <strong style="color: #00b894;">{{ day.revenue|floatformat:0 }} ₽</strong>
+            </div>
+            {% empty %}
+            <div style="text-align: center; color: #999; padding: 30px;">
+                Нет данных за этот период
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Билеты по дням -->
+    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+        <div style="background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); padding: 20px;">
+            <h3 style="margin: 0; color: white;">🎫 Билеты по дням</h3>
+        </div>
+        <div style="padding: 20px; max-height: 400px; overflow-y: auto;">
+            {% for day in tickets_by_day reversed %}
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee;">
+                <span style="color: #333;">{{ day.day|date:"d.m.Y" }}</span>
+                <span style="background: #6c5ce7; color: white; padding: 3px 10px; border-radius: 15px; font-size: 0.9rem;">
+                    {{ day.count }} шт.
+                </span>
+                <strong style="color: #00b894;">{{ day.revenue|floatformat:0 }} ₽</strong>
+            </div>
+            {% empty %}
+            <div style="text-align: center; color: #999; padding: 30px;">
+                Нет данных за этот период
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-top: 25px;">
+    
+   <div class="a-card">
+  <div class="a-card-head" style="background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);">
+    <h3 style="margin:0;">🔥 Популярные товары</h3>
+  </div>
+
+  <div class="a-card-body">
+    {% for product in popular_products %}
+      <div class="a-row">
+        <div style="color:#333;">{{ product.product__image_emoji }} {{ product.product__name }}</div>
+        <div class="a-muted">{{ product.total_qty }} шт.</div>
+        <div class="a-money">{{ product.total_revenue|floatformat:0 }} ₽</div>
+      </div>
+    {% empty %}
+      <div style="text-align:center; color:#999; padding:30px;">Нет данных</div>
+    {% endfor %}
+  </div>
+</div>
+    
+   {% if top_cashiers %}
+<div class="a-card">
+  <div class="a-card-head" style="background: linear-gradient(135deg, #FF6B35 0%, #f7931e 100%);">
+    <h3 style="margin:0;">🏆 Лучшие кассиры</h3>
+  </div>
+
+  <div class="a-card-body">
+    {% for cashier in top_cashiers %}
+      <div class="a-row">
+        <div>
+          <strong style="color:#333;">
+            {{ cashier.cashier__employee_profile__first_name }} {{ cashier.cashier__employee_profile__last_name }}
+          </strong><br>
+          <small class="a-muted">@{{ cashier.cashier__username }}</small>
+        </div>
+
+        <span class="a-badge" style="background:#f39c12;">
+          {{ cashier.orders_count }}
+        </span>
+
+        <div class="a-money">{{ cashier.revenue|floatformat:0 }} ₽</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+</div>
+
+<!-- Кнопки -->
+<div class="buttons-center" style="margin-top: 30px;">
+    <a href="{% url 'orders' %}" class="btn btn-secondary">← К заказам</a>
+    <a href="{% url 'dashboard' %}" class="btn btn-primary">📊 На главную</a>
+</div>
+{% endblock %}

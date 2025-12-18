@@ -1,0 +1,78 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Сотрудники{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">👥 Сотрудники</h2>
+    {% if user.role == 'admin' %}
+    <a href="{% url 'add_employee' %}" class="btn btn-success">➕ Добавить</a>
+    {% endif %}
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>👤 Сотрудник</th>
+                <th>💼 Должность</th>
+                <th>🕐 График</th>
+                <th>💰 Ставка</th>
+                <th>📞 Контакты</th>
+                <th>⚙️</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employees %}
+            <tr>
+                <td>
+                    <strong>{{ employee.full_name }}</strong>
+                    {% if employee.customuser %}
+                        <br><small style="color: #0077B6;">@{{ employee.customuser.username }}</small>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge badge-{{ employee.position }}">
+                        {{ employee.get_position_display }}
+                    </span>
+                </td>
+                <td>
+                    {% if employee.position != 'user' %}
+                        <strong>{{ employee.work_start|time:"H:i" }} - {{ employee.work_end|time:"H:i" }}</strong>
+                        <br><small style="color: #666;">{{ employee.work_days_display }}</small>
+                    {% else %}
+                        <span style="color: #999;">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if employee.position != 'user' %}
+                        <strong style="color: #00b894;">{{ employee.hourly_rate }} ₽/час</strong>
+                        <br><small>{{ employee.hours_per_day|floatformat:1 }}ч/день</small>
+                    {% else %}
+                        <span style="color: #999;">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if employee.phone %}📱 {{ employee.phone }}<br>{% endif %}
+                    {% if employee.email %}📧 {{ employee.email }}{% endif %}
+                    {% if not employee.phone and not employee.email %}—{% endif %}
+                </td>
+                <td>
+                    {% if user.role == 'admin' %}
+                    <a href="{% url 'edit_employee' employee.id %}" class="btn btn-warning" style="padding: 6px 10px;">✏️</a>
+                    <a href="{% url 'delete_employee' employee.id %}" class="btn btn-danger" style="padding: 6px 10px;">🗑️</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="empty-state">
+                    <div class="empty-state-icon">👥</div>
+                    <p>Сотрудников пока нет</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

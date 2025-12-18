@@ -1,0 +1,66 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Моя зарплата{% endblock %}
+
+{% block content %}
+<div class="page-title">💰 Мои расчётные листы</div>
+
+{% if employee %}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div class="stat-number" style="font-size: 1.3rem;">{{ employee.full_name }}</div>
+            <div class="stat-label">{{ employee.get_position_display }}</div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-icon">💵</div>
+            <div class="stat-number">{{ total_earned|floatformat:0 }} ₽</div>
+            <div class="stat-label">Всего получено</div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>📅 Период</th>
+                    <th>⏱️ Часов</th>
+                    <th>💵 Начислено</th>
+                    <th>💰 К выплате</th>
+                    <th>📊 Статус</th>
+                    <th>👁️</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payroll in payrolls %}
+                <tr>
+                    <td>{{ payroll.period_start|date:"d.m" }} — {{ payroll.period_end|date:"d.m.Y" }}</td>
+                    <td>{{ payroll.total_hours|floatformat:1 }}ч</td>
+                    <td>{{ payroll.gross_salary|floatformat:0 }} ₽</td>
+                    <td><strong style="color: #00b894;">{{ payroll.net_salary|floatformat:0 }} ₽</strong></td>
+                    <td>
+                        {% if payroll.status == 'paid' %}
+                            <span class="badge" style="background: #00b894; color: white;">✅ Выплачено</span>
+                        {% else %}
+                            <span class="badge" style="background: #f39c12; color: white;">⏳ Ожидание</span>
+                        {% endif %}
+                    </td>
+                    <td><a href="{% url 'payroll_detail' payroll.pk %}" class="btn btn-primary" style="padding: 6px 10px;">👁️</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #999;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">📭</div>
+                        Расчётных листов пока нет
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-warning">
+        ⚠️ У вас нет привязанного профиля сотрудника.
+    </div>
+{% endif %}
+{% endblock %}

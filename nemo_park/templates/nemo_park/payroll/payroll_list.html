@@ -1,0 +1,95 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Расчётные листы{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">💰 Расчётные листы</div>
+</div>
+
+<!-- Статистика -->
+<div class="stats-grid">
+    <div class="stat-card green">
+        <div class="stat-icon">💵</div>
+        <div class="stat-number">{{ total_paid|floatformat:0 }} ₽</div>
+        <div class="stat-label">Выплачено</div>
+    </div>
+    <div class="stat-card orange">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-number">{{ pending_count }}</div>
+        <div class="stat-label">Ожидают выплаты</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-number">{{ payrolls|length }}</div>
+        <div class="stat-label">Всего записей</div>
+    </div>
+</div>
+
+<!-- Кнопки -->
+<div class="buttons-center">
+    <a href="{% url 'payroll_calculate' %}" class="btn btn-success">🧮 Рассчитать зарплату</a>
+    <a href="{% url 'payroll_bulk' %}" class="btn btn-primary">📊 Массовый расчёт</a>
+    <a href="{% url 'payroll_bulk_delete' %}" class="btn btn-danger">🗑️ Удалить...</a>
+</div>
+
+<!-- Таблица -->
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>👤 Сотрудник</th>
+                <th>📅 Период</th>
+                <th>⏱️ Часов</th>
+                <th>💵 Начислено</th>
+                <th>📉 НДФЛ</th>
+                <th>💰 К выплате</th>
+                <th>📊 Статус</th>
+                <th>⚙️</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payroll in payrolls %}
+            <tr>
+                <td>
+                    <strong>{{ payroll.employee.full_name }}</strong>
+                    <br>
+                    <span class="badge badge-{{ payroll.employee.position }}">
+                        {{ payroll.employee.get_position_display }}
+                    </span>
+                </td>
+                <td>
+                    {{ payroll.period_start|date:"d.m" }} — {{ payroll.period_end|date:"d.m.Y" }}
+                </td>
+                <td>{{ payroll.total_hours|floatformat:1 }}ч</td>
+                <td>{{ payroll.gross_salary|floatformat:0 }} ₽</td>
+                <td style="color: #e74c3c;">-{{ payroll.ndfl_tax|floatformat:0 }} ₽</td>
+                <td><strong style="color: #00b894;">{{ payroll.net_salary|floatformat:0 }} ₽</strong></td>
+                <td>
+                    {% if payroll.status == 'paid' %}
+                        <span class="badge" style="background: #00b894; color: white;">✅ Выплачено</span>
+                    {% elif payroll.status == 'confirmed' %}
+                        <span class="badge" style="background: #0077B6; color: white;">📋 Подтверждён</span>
+                    {% else %}
+                        <span class="badge" style="background: #f39c12; color: white;">⏳ Черновик</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'payroll_detail' payroll.pk %}" class="btn btn-primary" style="padding: 8px 12px; font-size: 0.85rem;">👁️</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Расчётных листов пока нет</p>
+                        <a href="{% url 'payroll_calculate' %}" class="btn btn-success" style="margin-top: 15px;">🧮 Создать первый</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

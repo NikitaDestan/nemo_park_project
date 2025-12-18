@@ -3,178 +3,106 @@
 {% block title %}Главная{% endblock %}
 
 {% block content %}
-<h2 class="page-title">📊 Статистика парка «Немо»</h2>
+<div class="page-header">
+    <div class="page-title">📊 Панель управления</div>
+</div>
 
+{% if user.role == 'admin' %}
+<!-- Статистика для админа -->
 <div class="stats-grid">
-    {% if user.role == 'admin' %}
     <div class="stat-card">
         <div class="stat-icon">👥</div>
         <div class="stat-number">{{ employees_count }}</div>
-        <div class="stat-label">Сотрудники</div>
+        <div class="stat-label">Сотрудников</div>
     </div>
-    <div class="stat-card green">
+    <div class="stat-card orange">
         <div class="stat-icon">👤</div>
         <div class="stat-number">{{ visitors_count }}</div>
-        <div class="stat-label">Посетители</div>
+        <div class="stat-label">Посетителей</div>
     </div>
     <div class="stat-card purple">
         <div class="stat-icon">🎫</div>
         <div class="stat-number">{{ tickets_count }}</div>
-        <div class="stat-label">Билеты</div>
+        <div class="stat-label">Билетов</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon">🛒</div>
+        <div class="stat-number">{{ orders_count }}</div>
+        <div class="stat-label">Заказов</div>
+    </div>
+</div>
+
+<!-- Выручка -->
+<h3 style="margin: 30px 0 20px; color: #023E8A;">💰 Выручка</h3>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">🎫</div>
+        <div class="stat-number">{{ tickets_revenue|floatformat:0 }} ₽</div>
+        <div class="stat-label">За билеты</div>
     </div>
     <div class="stat-card orange">
-        <div class="stat-icon">💰</div>
-        <div class="stat-number">{{ total_revenue }} ₽</div>
+        <div class="stat-icon">🍕</div>
+        <div class="stat-number">{{ orders_revenue|floatformat:0 }} ₽</div>
+        <div class="stat-label">За заказы</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon">💵</div>
+        <div class="stat-number">{{ total_revenue|floatformat:0 }} ₽</div>
         <div class="stat-label">Общая выручка</div>
     </div>
-    
-    {% elif user.role == 'cashier' %}
-    <div class="stat-card green">
-        <div class="stat-icon">👤</div>
-        <div class="stat-number">{{ visitors_count }}</div>
-        <div class="stat-label">Всего посетителей</div>
-    </div>
-    <div class="stat-card purple">
+</div>
+
+<!-- Быстрые действия -->
+<h3 style="margin: 30px 0 20px; color: #023E8A;">⚡ Быстрые действия</h3>
+<div class="buttons-left">
+    <a href="{% url 'add_ticket' %}" class="btn btn-primary">🎫 Продать билет</a>
+    <a href="{% url 'create_order' %}" class="btn btn-success">🛒 Создать заказ</a>
+    <a href="{% url 'payroll_calculate' %}" class="btn btn-warning">💰 Расчёт зарплаты</a>
+    <a href="{% url 'add_employee' %}" class="btn btn-secondary">👤 Добавить сотрудника</a>
+</div>
+
+{% elif user.role == 'cashier' %}
+<!-- Статистика для кассира -->
+<div class="stats-grid">
+    <div class="stat-card">
         <div class="stat-icon">🎫</div>
         <div class="stat-number">{{ tickets_count }}</div>
-        <div class="stat-label">Продано билетов</div>
+        <div class="stat-label">Моих билетов</div>
     </div>
     <div class="stat-card orange">
-        <div class="stat-icon">💰</div>
-        <div class="stat-number">{{ personal_revenue }} ₽</div>
-        <div class="stat-label">Ваша выручка</div>
+        <div class="stat-icon">🛒</div>
+        <div class="stat-number">{{ orders_count }}</div>
+        <div class="stat-label">Моих заказов</div>
     </div>
-    {% endif %}
+    <div class="stat-card green">
+        <div class="stat-icon">💵</div>
+        <div class="stat-number">{{ personal_revenue|floatformat:0 }} ₽</div>
+        <div class="stat-label">Моя выручка</div>
+    </div>
 </div>
 
-{% if user.is_authenticated and user.role != 'user' %}
-<div class="quick-actions">
-    <h3 class="section-title">🚀 Быстрые действия</h3>
-    <div class="actions-grid">
-        {% if user.role == 'admin' %}
-        <a href="{% url 'add_employee' %}" class="action-card">
-            <div class="action-icon">👥</div>
-            <div class="action-text">
-                <span class="action-title">Добавить сотрудника</span>
-                <span class="action-desc">Новый член команды</span>
-            </div>
-        </a>
-        <a href="{% url 'add_visitor' %}" class="action-card">
-            <div class="action-icon">👤</div>
-            <div class="action-text">
-                <span class="action-title">Добавить посетителя</span>
-                <span class="action-desc">Регистрация гостя</span>
-            </div>
-        </a>
-        {% endif %}
-        <a href="{% url 'add_ticket' %}" class="action-card sell-ticket">
-            <div class="action-icon">🎫</div>
-            <div class="action-text">
-                <span class="action-title">Продать билет</span>
-                <span class="action-desc">Оформить продажу</span>
-            </div>
-        </a>
+<!-- Детализация выручки -->
+<div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin-top: 20px;">
+    <h4 style="margin: 0 0 15px; color: #023E8A;">📊 Детализация</h4>
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        <div>
+            <span style="color: #666;">🎫 Билеты:</span>
+            <strong style="color: #0077B6;">{{ tickets_revenue|floatformat:0 }} ₽</strong>
+        </div>
+        <div>
+            <span style="color: #666;">🍕 Заказы:</span>
+            <strong style="color: #f39c12;">{{ orders_revenue|floatformat:0 }} ₽</strong>
+        </div>
     </div>
 </div>
+
+<!-- Быстрые действия -->
+<h3 style="margin: 30px 0 20px; color: #023E8A;">⚡ Быстрые действия</h3>
+<div class="buttons-left">
+    <a href="{% url 'add_ticket' %}" class="btn btn-primary">🎫 Продать билет</a>
+    <a href="{% url 'create_order' %}" class="btn btn-success">🛒 Создать заказ</a>
+    <a href="{% url 'my_payroll' %}" class="btn btn-warning">💰 Моя зарплата</a>
+</div>
+
 {% endif %}
-
-<style>
-    /* Быстрые действия */
-    .quick-actions {
-        margin-top: 40px;
-    }
-
-    .section-title {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #023E8A;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-
-    .actions-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-    }
-
-    .action-card {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 20px 25px;
-        background: white;
-        border-radius: 16px;
-        text-decoration: none;
-        color: #333;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-    }
-
-    .action-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(0, 119, 182, 0.2);
-        border-color: #0077B6;
-    }
-
-    .action-card.sell-ticket {
-        background: linear-gradient(135deg, #FF6B35 0%, #f7931e 100%);
-        color: white;
-    }
-
-    .action-card.sell-ticket:hover {
-        transform: translateY(-5px) scale(1.02);
-        box-shadow: 0 15px 40px rgba(255, 107, 53, 0.4);
-        border-color: transparent;
-    }
-
-    .action-icon {
-        font-size: 2.5rem;
-        width: 60px;
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f0f7ff;
-        border-radius: 12px;
-    }
-
-    .action-card.sell-ticket .action-icon {
-        background: rgba(255, 255, 255, 0.2);
-    }
-
-    .action-text {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .action-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-    }
-
-    .action-desc {
-        font-size: 0.85rem;
-        opacity: 0.7;
-        margin-top: 3px;
-    }
-
-    /* Адаптивность */
-    @media (max-width: 768px) {
-        .actions-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .action-card {
-            padding: 15px 20px;
-        }
-        
-        .action-icon {
-            font-size: 2rem;
-            width: 50px;
-            height: 50px;
-        }
-    }
-</style>
 {% endblock %}

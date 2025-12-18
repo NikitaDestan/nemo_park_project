@@ -1,0 +1,129 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Расчёт зарплаты{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">🧮 Расчёт заработной платы</div>
+</div>
+
+<!-- Форма расчёта -->
+<div class="form-container-wide">
+    <div class="form-card">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div>
+                    <label>👤 Сотрудник</label>
+                    {{ form.employee }}
+                </div>
+                <div>
+                    <label>📅 Начало периода</label>
+                    {{ form.period_start }}
+                </div>
+                <div>
+                    <label>📅 Конец периода</label>
+                    {{ form.period_end }}
+                </div>
+                <div>
+                    <label>&nbsp;</label>
+                    <button type="submit" name="preview" class="btn btn-warning" style="width: 100%;">
+                        🧮 Рассчитать
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Результат расчёта -->
+{% if preview %}
+<div class="result-card">
+    <div class="result-card-header">
+        <h3 style="margin: 0;">📋 Расчётный лист</h3>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">
+            {{ preview.employee.full_name }} | {{ preview.period_start|date:"d.m.Y" }} — {{ preview.period_end|date:"d.m.Y" }}
+        </p>
+    </div>
+    
+    <div class="result-card-body">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 0;">💼 Должность</td>
+                <td style="padding: 12px 0; text-align: right;">
+                    <span class="badge badge-{{ preview.employee.position }}">{{ preview.employee.get_position_display }}</span>
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 0;">🕐 График работы</td>
+                <td style="padding: 12px 0; text-align: right;">
+                    {{ preview.employee.work_start|time:"H:i" }} — {{ preview.employee.work_end|time:"H:i" }}
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 0;">📅 Рабочие дни</td>
+                <td style="padding: 12px 0; text-align: right;">{{ preview.employee.work_days_display }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 0;">💵 Ставка в час</td>
+                <td style="padding: 12px 0; text-align: right;"><strong>{{ preview.hourly_rate }} ₽/час</strong></td>
+            </tr>
+            <tr style="border-bottom: 2px solid #0077B6; background: #f8fafc;">
+                <td style="padding: 12px 0; font-weight: 600;">📆 Рабочих дней в периоде</td>
+                <td style="padding: 12px 0; text-align: right;"><strong>{{ preview.work_days }} дн.</strong></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 0;">⏱️ Часов в день</td>
+                <td style="padding: 12px 0; text-align: right;">{{ preview.hours_per_day|floatformat:1 }}ч</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 0;">⏱️ Всего часов</td>
+                <td style="padding: 12px 0; text-align: right;"><strong>{{ preview.total_hours|floatformat:1 }}ч</strong></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 0;">🔥 Переработка</td>
+                <td style="padding: 12px 0; text-align: right;">{{ preview.overtime_hours|floatformat:1 }}ч</td>
+            </tr>
+            <tr style="border-bottom: 2px solid #0077B6; background: #f8fafc;">
+                <td style="padding: 12px 0; font-weight: 600;">💰 Базовая оплата</td>
+                <td style="padding: 12px 0; text-align: right;">{{ preview.base_salary|floatformat:0 }} ₽</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 0;">🔥 За переработку (x1.5)</td>
+                <td style="padding: 12px 0; text-align: right;">{{ preview.overtime_pay|floatformat:0 }} ₽</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 0;">🎁 Премия</td>
+                <td style="padding: 12px 0; text-align: right;">{{ preview.bonus|floatformat:0 }} ₽</td>
+            </tr>
+            <tr style="border-bottom: 2px solid #00b894; background: #e8f5e9;">
+                <td style="padding: 12px 0; font-weight: 600;">📊 ИТОГО начислено</td>
+                <td style="padding: 12px 0; text-align: right; font-weight: 700;">{{ preview.gross_salary|floatformat:0 }} ₽</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee; background: #fff3e0;">
+                <td style="padding: 12px 0; color: #e74c3c;">📉 НДФЛ (13%)</td>
+                <td style="padding: 12px 0; text-align: right; color: #e74c3c;">-{{ preview.ndfl_tax|floatformat:0 }} ₽</td>
+            </tr>
+            <tr style="background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); color: white;">
+                <td style="padding: 15px; font-size: 1.2rem; font-weight: 700;">💵 К ВЫПЛАТЕ</td>
+                <td style="padding: 15px; text-align: right; font-size: 1.5rem; font-weight: 800;">{{ preview.net_salary|floatformat:0 }} ₽</td>
+            </tr>
+        </table>
+        
+        <form method="post" style="margin-top: 25px;">
+            {% csrf_token %}
+            <input type="hidden" name="employee" value="{{ preview.employee.id }}">
+            <input type="hidden" name="period_start" value="{{ preview.period_start|date:'Y-m-d' }}">
+            <input type="hidden" name="period_end" value="{{ preview.period_end|date:'Y-m-d' }}">
+            <button type="submit" name="create" class="btn btn-success" style="width: 100%; padding: 15px; font-size: 1.1rem;">
+                ✅ Сохранить расчётный лист
+            </button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<div class="buttons-center" style="margin-top: 25px;">
+    <a href="{% url 'payroll_list' %}" class="btn btn-secondary">← Назад к списку</a>
+</div>
+{% endblock %}

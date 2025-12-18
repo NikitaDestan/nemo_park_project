@@ -22,22 +22,31 @@ def create_test_data():
     
     # ==================== СОТРУДНИКИ И ПОЛЬЗОВАТЕЛИ ====================
     
-    # 5 КАССИРОВ
+    # 5 КАССИРОВ с разными графиками
     employees_cashiers = [
-        {'first_name': 'Иван', 'last_name': 'Петров', 'username': 'ivan', 'password': '1111'},
-        {'first_name': 'Мария', 'last_name': 'Сидорова', 'username': 'maria', 'password': '2222'},
-        {'first_name': 'Алексей', 'last_name': 'Козлов', 'username': 'alex', 'password': '3333'},
-        {'first_name': 'Ольга', 'last_name': 'Новикова', 'username': 'olga', 'password': '4444'},
-        {'first_name': 'Дмитрий', 'last_name': 'Волков', 'username': 'dmitry', 'password': '5555'},
+        {'first_name': 'Иван', 'last_name': 'Петров', 'username': 'ivan', 'password': '1111',
+         'work_start': '09:00', 'work_end': '18:00', 'break_minutes': 60, 'work_days': '1,2,3,4,5', 'hourly_rate': 250},
+        {'first_name': 'Мария', 'last_name': 'Сидорова', 'username': 'maria', 'password': '2222',
+         'work_start': '10:00', 'work_end': '19:00', 'break_minutes': 60, 'work_days': '1,2,3,4,5', 'hourly_rate': 250},
+        {'first_name': 'Алексей', 'last_name': 'Козлов', 'username': 'alex', 'password': '3333',
+         'work_start': '12:00', 'work_end': '22:00', 'break_minutes': 60, 'work_days': '2,3,4,5,6', 'hourly_rate': 280},
+        {'first_name': 'Ольга', 'last_name': 'Новикова', 'username': 'olga', 'password': '4444',
+         'work_start': '08:00', 'work_end': '16:00', 'break_minutes': 45, 'work_days': '1,2,3,4,5', 'hourly_rate': 250},
+        {'first_name': 'Дмитрий', 'last_name': 'Волков', 'username': 'dmitry', 'password': '5555',
+         'work_start': '14:00', 'work_end': '23:00', 'break_minutes': 60, 'work_days': '3,4,5,6,7', 'hourly_rate': 300},
     ]
     
-    for data in employees_cashiers:
+    for i, data in enumerate(employees_cashiers):
         employee = Employee.objects.create(
             first_name=data['first_name'],
             last_name=data['last_name'],
             position='cashier',
-            salary=35000,
-            phone=f'+7 (999) 100-{employees_cashiers.index(data):02d}-00',
+            hourly_rate=data['hourly_rate'],
+            work_start=data['work_start'],
+            work_end=data['work_end'],
+            break_minutes=data['break_minutes'],
+            work_days=data['work_days'],
+            phone=f'+7 (999) 100-{i:02d}-00',
             email=f"{data['username']}@nemopark.ru"
         )
         
@@ -49,22 +58,31 @@ def create_test_data():
             employee_profile=employee
         )
     
-    # 5 АДМИНОВ
+    # 5 АДМИНОВ с разными графиками
     employees_admins = [
-        {'first_name': 'Анна', 'last_name': 'Смирнова', 'username': 'anna', 'password': '6666'},
-        {'first_name': 'Сергей', 'last_name': 'Кузнецов', 'username': 'sergey', 'password': '7777'},
-        {'first_name': 'Елена', 'last_name': 'Попова', 'username': 'elena', 'password': '8888'},
-        {'first_name': 'Михаил', 'last_name': 'Лебедев', 'username': 'mikhail', 'password': '9999'},
-        {'first_name': 'Татьяна', 'last_name': 'Морозова', 'username': 'tatyana', 'password': '0000'},
+        {'first_name': 'Анна', 'last_name': 'Смирнова', 'username': 'anna', 'password': '6666',
+         'work_start': '09:00', 'work_end': '18:00', 'break_minutes': 60, 'work_days': '1,2,3,4,5', 'hourly_rate': 400},
+        {'first_name': 'Сергей', 'last_name': 'Кузнецов', 'username': 'sergey', 'password': '7777',
+         'work_start': '10:00', 'work_end': '20:00', 'break_minutes': 60, 'work_days': '1,2,3,4,5', 'hourly_rate': 450},
+        {'first_name': 'Елена', 'last_name': 'Попова', 'username': 'elena', 'password': '8888',
+         'work_start': '08:00', 'work_end': '17:00', 'break_minutes': 60, 'work_days': '1,2,3,4,5', 'hourly_rate': 400},
+        {'first_name': 'Михаил', 'last_name': 'Лебедев', 'username': 'mikhail', 'password': '9999',
+         'work_start': '11:00', 'work_end': '21:00', 'break_minutes': 60, 'work_days': '2,3,4,5,6', 'hourly_rate': 420},
+        {'first_name': 'Татьяна', 'last_name': 'Морозова', 'username': 'tatyana', 'password': '0000',
+         'work_start': '09:00', 'work_end': '18:00', 'break_minutes': 45, 'work_days': '1,2,3,4,5', 'hourly_rate': 400},
     ]
     
-    for data in employees_admins:
+    for i, data in enumerate(employees_admins):
         employee = Employee.objects.create(
             first_name=data['first_name'],
             last_name=data['last_name'],
             position='admin',
-            salary=50000,
-            phone=f'+7 (999) 200-{employees_admins.index(data):02d}-00',
+            hourly_rate=data['hourly_rate'],
+            work_start=data['work_start'],
+            work_end=data['work_end'],
+            break_minutes=data['break_minutes'],
+            work_days=data['work_days'],
+            phone=f'+7 (999) 200-{i:02d}-00',
             email=f"{data['username']}@nemopark.ru"
         )
         
@@ -81,12 +99,16 @@ def create_test_data():
         first_name='Администратор',
         last_name='Главный',
         position='admin',
-        salary=80000,
+        hourly_rate=500,
+        work_start='09:00',
+        work_end='18:00',
+        break_minutes=60,
+        work_days='1,2,3,4,5',
         phone='+7 (999) 999-99-99',
         email='admin@nemopark.ru'
     )
     
-    admin_user = CustomUser.objects.create_superuser(
+    CustomUser.objects.create_superuser(
         username='admin',
         email='admin@nemopark.ru',
         password='admin',
@@ -108,12 +130,7 @@ def create_test_data():
     
     visitors = []
     for data in visitors_data:
-        visitor = Visitor.objects.create(
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            email=data['email'],
-            phone=data['phone']
-        )
+        visitor = Visitor.objects.create(**data)
         visitors.append(visitor)
     
     print("👤 Посетители созданы")
@@ -132,7 +149,7 @@ def create_test_data():
     
     print("🎫 Билеты созданы")
     
-    # ==================== ТОВАРЫ (ЕДА) ====================
+        # ==================== ТОВАРЫ (ЕДА) ====================
     products_data = [
         # Пицца
         {'name': 'Пицца Маргарита', 'category': 'pizza', 'price': 450, 'emoji': '🍕', 'popular': True,
@@ -189,14 +206,14 @@ def create_test_data():
          'description': '2 пиццы + 4 напитка + картофель'},
     ]
     
-    for product_data in products_data:
+    for p in products_data:
         Product.objects.create(
-            name=product_data['name'],
-            category=product_data['category'],
-            price=product_data['price'],
-            image_emoji=product_data['emoji'],
-            description=product_data.get('description', ''),
-            is_popular=product_data.get('popular', False),
+            name=p['name'],
+            category=p['category'],
+            price=p['price'],
+            image_emoji=p['emoji'],
+            description=p.get('description', ''),
+            is_popular=p.get('popular', False),
             is_available=True
         )
     
@@ -209,17 +226,14 @@ def create_test_data():
     print("\n👤 ПОЛЬЗОВАТЕЛИ:")
     print("\n🔴 СУПЕР АДМИН:")
     print("   login=admin       password=admin")
-    print("\n🟢 КАССИРЫ:")
+    print("\n🟢 КАССИРЫ (250-300 ₽/час):")
     for data in employees_cashiers:
-        print(f"   login={data['username']:<10} password={data['password']}")
-    print("\n🟡 АДМИНЫ:")
+        days = data['work_days'].replace('1','Пн').replace('2','Вт').replace('3','Ср').replace('4','Чт').replace('5','Пт').replace('6','Сб').replace('7','Вс')
+        print(f"   {data['username']:<10} {data['password']}  |  {data['work_start']}-{data['work_end']}  |  {days}")
+    print("\n🟡 АДМИНЫ (400-450 ₽/час):")
     for data in employees_admins:
-        print(f"   login={data['username']:<10} password={data['password']}")
-    print("\n📊 СТАТИСТИКА:")
-    print(f"   👥 Сотрудников: {Employee.objects.count()}")
-    print(f"   👤 Посетителей: {Visitor.objects.count()}")
-    print(f"   🎫 Билетов: {Ticket.objects.count()}")
-    print(f"   🍕 Товаров: {Product.objects.count()}")
+        days = data['work_days'].replace('1','Пн').replace('2','Вт').replace('3','Ср').replace('4','Чт').replace('5','Пт').replace('6','Сб').replace('7','Вс')
+        print(f"   {data['username']:<10} {data['password']}  |  {data['work_start']}-{data['work_end']}  |  {days}")
     print("="*60)
 
 if __name__ == '__main__':

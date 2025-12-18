@@ -1,0 +1,28 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Удалить расчётный лист{% endblock %}
+
+{% block content %}
+<div class="page-title">🗑️ Удалить расчётный лист</div>
+
+<div style="max-width: 500px;">
+    <div class="alert alert-warning">
+        ⚠️ Вы уверены, что хотите удалить этот расчётный лист?
+    </div>
+    
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+        <p><strong>👤 Сотрудник:</strong> {{ payroll.employee.full_name }}</p>
+        <p><strong>📅 Период:</strong> {{ payroll.period_start|date:"d.m.Y" }} — {{ payroll.period_end|date:"d.m.Y" }}</p>
+        <p><strong>💰 К выплате:</strong> {{ payroll.net_salary|floatformat:0 }} ₽</p>
+        <p><strong>📊 Статус:</strong> {{ payroll.get_status_display }}</p>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-danger">🗑️ Да, удалить</button>
+            <a href="{% url 'payroll_list' %}" class="btn btn-secondary">← Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

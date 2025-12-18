@@ -2,20 +2,29 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Авторизация
     path('login/', views.user_login, name='login'),
     path('register/', views.user_register, name='register'),
     path('logout/', views.user_logout, name='logout'),
+    
+    # Главная
     path('', views.dashboard, name='dashboard'),
+    
+    # Сотрудники
     path('employees/', views.employees_list, name='employees'),
-    path('visitors/', views.visitors_list, name='visitors'),
-    path('tickets/', views.tickets_list, name='tickets'),
     path('add-employee/', views.add_employee, name='add_employee'),
-    path('add-visitor/', views.add_visitor, name='add_visitor'),
-    path('add-ticket/', views.add_ticket, name='add_ticket'),
     path('edit-employee/<int:employee_id>/', views.edit_employee, name='edit_employee'),
     path('delete-employee/<int:employee_id>/', views.delete_employee, name='delete_employee'),
+    
+    # Посетители
+    path('visitors/', views.visitors_list, name='visitors'),
+    path('add-visitor/', views.add_visitor, name='add_visitor'),
     path('edit-visitor/<int:visitor_id>/', views.edit_visitor, name='edit_visitor'),
     path('delete-visitor/<int:visitor_id>/', views.delete_visitor, name='delete_visitor'),
+    
+    # Билеты
+    path('tickets/', views.tickets_list, name='tickets'),
+    path('add-ticket/', views.add_ticket, name='add_ticket'),
     path('edit-ticket/<int:ticket_id>/', views.edit_ticket, name='edit_ticket'),
     path('delete-ticket/<int:ticket_id>/', views.delete_ticket, name='delete_ticket'),
     
@@ -31,4 +40,15 @@ urlpatterns = [
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
     path('order/<int:order_id>/status/', views.update_order_status, name='update_order_status'),
     path('delete-order/<int:order_id>/', views.delete_order, name='delete_order'),
+    
+    # ========== НОВОЕ: Зарплата ==========
+    path('payroll/', views.payroll_list, name='payroll_list'),
+    path('payroll/calculate/', views.payroll_calculate, name='payroll_calculate'),
+    path('payroll/bulk/', views.payroll_bulk, name='payroll_bulk'),
+    path('payroll/my/', views.my_payroll, name='my_payroll'),
+    path('payroll/<int:pk>/', views.payroll_detail, name='payroll_detail'),
+    path('payroll/<int:pk>/paid/', views.payroll_mark_paid, name='payroll_mark_paid'),
+    path('payroll/<int:pk>/delete/', views.payroll_delete, name='payroll_delete'),
+    path('payroll/bulk-delete/', views.payroll_bulk_delete, name='payroll_bulk_delete'),
+    path('orders/analytics/', views.orders_analytics, name='orders_analytics'),
 ]

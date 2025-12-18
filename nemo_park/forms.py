@@ -4,7 +4,7 @@ from django.core.validators import RegexValidator, MinValueValidator
 from django.core.exceptions import ValidationError
 import re
 from .models import CustomUser, Employee, Visitor, Ticket, Product
-
+from datetime import date, timedelta
 
 # ==================== ВАЛИДАТОРЫ ====================
 
@@ -173,72 +173,30 @@ class RegisterForm(UserCreationForm):
 class EmployeeForm(forms.ModelForm):
     username = forms.CharField(
         label='Логин',
-        widget=forms.TextInput(attrs={
-            'class': 'form-control', 
-            'placeholder': 'Логин для входа'
-        })
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Логин для входа'})
     )
     password = forms.CharField(
         label='Пароль',
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control', 
-            'placeholder': 'Пароль'
-        })
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Пароль'})
     )
     
     class Meta:
         model = Employee
-        fields = ['first_name', 'last_name', 'position', 'salary', 'hire_date', 'phone', 'email']
+        fields = ['first_name', 'last_name', 'position', 'hourly_rate',
+                  'work_start', 'work_end', 'break_minutes', 'work_days',
+                  'phone', 'email']
         widgets = {
-            'first_name': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Имя',
-                'pattern': '[а-яА-ЯёЁa-zA-Z\\s\\-]+',
-                'title': 'Только буквы'
-            }),
-            'last_name': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Фамилия',
-                'pattern': '[а-яА-ЯёЁa-zA-Z\\s\\-]+',
-                'title': 'Только буквы'
-            }),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Имя'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Фамилия'}),
             'position': forms.Select(attrs={'class': 'form-control'}),
-            'salary': forms.NumberInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Зарплата',
-                'min': '0',
-                'max': '10000000',
-                'step': '100'
-            }),
-            'hire_date': forms.DateInput(attrs={
-                'class': 'form-control', 
-                'type': 'date'
-            }),
-            'phone': forms.TextInput(attrs={
-                'class': 'form-control phone-mask', 
-                'placeholder': '+7 (___) ___-__-__',
-                'data-mask': '+7 (999) 999-99-99'
-            }),
-            'email': forms.EmailInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Email'
-            }),
+            'hourly_rate': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '250', 'step': '10'}),
+            'work_start': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}, format='%H:%M'),
+            'work_end': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}, format='%H:%M'),
+            'break_minutes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '60'}),
+            'work_days': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '1,2,3,4,5'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control phone-mask', 'placeholder': '+7 (___) ___-__-__'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'email@example.com'}),
         }
-    
-    def clean_first_name(self):
-        return clean_name(self.cleaned_data.get('first_name'), 'Имя')
-    
-    def clean_last_name(self):
-        return clean_name(self.cleaned_data.get('last_name'), 'Фамилия')
-    
-    def clean_phone(self):
-        value = self.cleaned_data.get('phone')
-        if value:
-            return clean_phone(value)
-        return value
-    
-    def clean_salary(self):
-        return clean_salary(self.cleaned_data.get('salary'))
 
 
 class VisitorForm(forms.ModelForm):
@@ -404,51 +362,30 @@ class EditEmployeeForm(forms.ModelForm):
     username = forms.CharField(
         label='Логин',
         required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control', 
-            'placeholder': 'Новый логин'
-        })
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Логин'})
     )
     new_password = forms.CharField(
         label='Новый пароль',
         required=False,
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control', 
-            'placeholder': 'Оставьте пустым, если не меняете'
-        })
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Оставьте пустым, если не меняете'})
     )
     
     class Meta:
         model = Employee
-        fields = ['first_name', 'last_name', 'position', 'salary', 'phone', 'email']  
+        fields = ['first_name', 'last_name', 'position', 'hourly_rate', 
+                  'work_start', 'work_end', 'break_minutes', 'work_days',
+                  'phone', 'email']
         widgets = {
-            'first_name': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Имя',
-                'pattern': '[а-яА-ЯёЁa-zA-Z\\s\\-]+',
-                'title': 'Только буквы'
-            }),
-            'last_name': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Фамилия',
-                'pattern': '[а-яА-ЯёЁa-zA-Z\\s\\-]+',
-                'title': 'Только буквы'
-            }),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'position': forms.Select(attrs={'class': 'form-control'}),
-            'salary': forms.NumberInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Зарплата',
-                'min': '0',
-                'step': '100'
-            }),
-            'phone': forms.TextInput(attrs={
-                'class': 'form-control phone-mask', 
-                'placeholder': '+7 (___) ___-__-__'
-            }),
-            'email': forms.EmailInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Email'
-            }),
+            'hourly_rate': forms.NumberInput(attrs={'class': 'form-control', 'step': '10'}),
+            'work_start': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'work_end': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'break_minutes': forms.NumberInput(attrs={'class': 'form-control'}),
+            'work_days': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '1,2,3,4,5'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control phone-mask'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
     
     def clean_first_name(self):
@@ -521,3 +458,48 @@ class ProductForm(forms.ModelForm):
         if name and len(name) < 2:
             raise ValidationError('Название должно содержать минимум 2 символа')
         return name
+
+
+class PayrollCalculateForm(forms.Form):
+    """Форма для расчёта зарплаты"""
+    
+    employee = forms.ModelChoiceField(
+        queryset=Employee.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='Сотрудник'
+    )
+    period_start = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label='Начало периода'
+    )
+    period_end = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label='Конец периода'
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # По умолчанию — текущий месяц
+        today = date.today()
+        first_day = today.replace(day=1)
+        # Последний день месяца
+        if today.month == 12:
+            last_day = today.replace(day=31)
+        else:
+            last_day = today.replace(month=today.month + 1, day=1) - timedelta(days=1)
+        
+        self.fields['period_start'].initial = first_day
+        self.fields['period_end'].initial = last_day
+
+
+class PayrollBulkForm(forms.Form):
+    """Массовый расчёт зарплаты для всех сотрудников"""
+    
+    period_start = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label='Начало периода'
+    )
+    period_end = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label='Конец периода'
+    )
