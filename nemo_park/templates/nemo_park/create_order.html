@@ -107,7 +107,7 @@
     .item-info { flex: 1; }
     .item-name { display: block; font-weight: 600; color: #333; }
     .item-price { font-size: 0.9rem; color: #00b894; font-weight: 700; }
-    .add-btn { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00b894, #00cec9); color: white; border: none; font-size: 1.5rem; cursor: pointer; transition: all 0.2s ease; }
+    .add-btn { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00b894, #00cec9); color: white; border: none; font-size: 1.5rem; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; line-height: 1; padding: 0; }
     .add-btn:hover { transform: scale(1.1); box-shadow: 0 5px 15px rgba(0,184,148,0.4); }
     
     /* Корзина */
@@ -123,7 +123,8 @@
     .cart-item-name { font-weight: 600; font-size: 0.9rem; }
     .cart-item-price { font-size: 0.85rem; color: #00b894; }
     .cart-item-qty { display: flex; align-items: center; gap: 8px; }
-    .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer; font-weight: bold; transition: all 0.2s ease; }
+    .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer; font-weight: bold; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; line-height: 1; padding: 0; }
+    .qty-btn.none { background: #dadada; color: #909090; cursor: not-allowed; opacity: 0.6; }
     .qty-btn.minus { background: #fee2e2; color: #e74c3c; }
     .qty-btn.plus { background: #d4edda; color: #00b894; }
     .qty-btn:hover { transform: scale(1.1); }
@@ -204,6 +205,10 @@ function updateQuantity(id, delta) {
     for (var i = 0; i < cart.length; i++) {
         if (cart[i].product_id === id) {
             cart[i].quantity += delta;
+            if (cart[i].quantity > 250) {
+                cart[i].quantity = 250;
+                return;
+            }
             if (cart[i].quantity <= 0) {
                 removeFromCart(id);
                 return;
@@ -220,6 +225,7 @@ function clearCart() {
     updateCartUI();
 }
 
+// Обновление UI корзины
 // Обновление UI корзины
 function updateCartUI() {
     var container = document.getElementById('cart-items');
@@ -243,6 +249,10 @@ function updateCartUI() {
         var itemTotal = item.price * item.quantity;
         total += itemTotal;
         
+        var isMaxReached = item.quantity > 250;
+        var plusBtnClass = isMaxReached ? 'qty-btn plus none' : 'qty-btn plus';
+        var plusBtnDisabled = isMaxReached ? ' none' : '';
+        
         html += '<div class="cart-item">';
         html += '<span class="cart-item-emoji">' + item.emoji + '</span>';
         html += '<div class="cart-item-info">';
@@ -252,7 +262,7 @@ function updateCartUI() {
         html += '<div class="cart-item-qty">';
         html += '<button type="button" class="qty-btn minus" onclick="updateQuantity(' + item.product_id + ', -1)">−</button>';
         html += '<span class="qty-value">' + item.quantity + '</span>';
-        html += '<button type="button" class="qty-btn plus" onclick="updateQuantity(' + item.product_id + ', 1)">+</button>';
+        html += '<button type="button" class="' + plusBtnClass + '"' + plusBtnDisabled + ' onclick="updateQuantity(' + item.product_id + ', 1)">+</button>';
         html += '</div>';
         html += '<button type="button" class="remove-btn" onclick="removeFromCart(' + item.product_id + ')">🗑️</button>';
         html += '</div>';

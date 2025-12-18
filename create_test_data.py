@@ -20,97 +20,115 @@ def create_test_data():
     
     print("🗑️ Старые данные удалены")
     
-    # ==================== ПОЛЬЗОВАТЕЛИ ====================
+    # ==================== СОТРУДНИКИ И ПОЛЬЗОВАТЕЛИ ====================
+    
+    # 5 КАССИРОВ
+    employees_cashiers = [
+        {'first_name': 'Иван', 'last_name': 'Петров', 'username': 'ivan', 'password': '1111'},
+        {'first_name': 'Мария', 'last_name': 'Сидорова', 'username': 'maria', 'password': '2222'},
+        {'first_name': 'Алексей', 'last_name': 'Козлов', 'username': 'alex', 'password': '3333'},
+        {'first_name': 'Ольга', 'last_name': 'Новикова', 'username': 'olga', 'password': '4444'},
+        {'first_name': 'Дмитрий', 'last_name': 'Волков', 'username': 'dmitry', 'password': '5555'},
+    ]
+    
+    for data in employees_cashiers:
+        employee = Employee.objects.create(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            position='cashier',
+            salary=35000,
+            phone=f'+7 (999) 100-{employees_cashiers.index(data):02d}-00',
+            email=f"{data['username']}@nemopark.ru"
+        )
+        
+        CustomUser.objects.create_user(
+            username=data['username'],
+            password=data['password'],
+            role='cashier',
+            position='cashier',
+            employee_profile=employee
+        )
+    
+    # 5 АДМИНОВ
+    employees_admins = [
+        {'first_name': 'Анна', 'last_name': 'Смирнова', 'username': 'anna', 'password': '6666'},
+        {'first_name': 'Сергей', 'last_name': 'Кузнецов', 'username': 'sergey', 'password': '7777'},
+        {'first_name': 'Елена', 'last_name': 'Попова', 'username': 'elena', 'password': '8888'},
+        {'first_name': 'Михаил', 'last_name': 'Лебедев', 'username': 'mikhail', 'password': '9999'},
+        {'first_name': 'Татьяна', 'last_name': 'Морозова', 'username': 'tatyana', 'password': '0000'},
+    ]
+    
+    for data in employees_admins:
+        employee = Employee.objects.create(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            position='admin',
+            salary=50000,
+            phone=f'+7 (999) 200-{employees_admins.index(data):02d}-00',
+            email=f"{data['username']}@nemopark.ru"
+        )
+        
+        CustomUser.objects.create_user(
+            username=data['username'],
+            password=data['password'],
+            role='admin',
+            position='admin',
+            employee_profile=employee
+        )
+    
+    # СУПЕР АДМИН
+    admin_employee = Employee.objects.create(
+        first_name='Администратор',
+        last_name='Главный',
+        position='admin',
+        salary=80000,
+        phone='+7 (999) 999-99-99',
+        email='admin@nemopark.ru'
+    )
+    
     admin_user = CustomUser.objects.create_superuser(
         username='admin',
         email='admin@nemopark.ru',
-        password='admin123',
-        role='admin',
-        position='admin'
-    )
-    
-    # ==================== СОТРУДНИКИ ====================
-    employee1 = Employee.objects.create(
-        first_name='Иван',
-        last_name='Петров',
-        position='cashier',
-        salary=35000,
-        phone='+7 (999) 123-45-67',
-        email='ivan@nemopark.ru'
-    )
-    
-    employee2 = Employee.objects.create(
-        first_name='Мария',
-        last_name='Сидорова', 
-        position='admin',
-        salary=50000,
-        phone='+7 (999) 765-43-21',
-        email='maria@nemopark.ru'
-    )
-    
-    cashier_user = CustomUser.objects.create_user(
-        username='cashier',
-        password='cashier123',
-        role='cashier',
-        position='cashier',
-        employee_profile=employee1
-    )
-    
-    admin2_user = CustomUser.objects.create_user(
-        username='manager',
-        password='manager123', 
+        password='admin',
         role='admin',
         position='admin',
-        employee_profile=employee2
+        employee_profile=admin_employee
     )
     
     print("👥 Сотрудники созданы")
     
     # ==================== ПОСЕТИТЕЛИ ====================
-    visitor1 = Visitor.objects.create(
-        first_name='Алексей',
-        last_name='Козлов',
-        email='alex@mail.ru',
-        phone='+7 (999) 111-22-33'
-    )
+    visitors_data = [
+        {'first_name': 'Артём', 'last_name': 'Соколов', 'email': 'artem@mail.ru', 'phone': '+7 (999) 111-22-33'},
+        {'first_name': 'Виктория', 'last_name': 'Павлова', 'email': 'vika@mail.ru', 'phone': '+7 (999) 222-33-44'},
+        {'first_name': 'Никита', 'last_name': 'Егоров', 'email': 'nikita@mail.ru', 'phone': '+7 (999) 333-44-55'},
+        {'first_name': 'Екатерина', 'last_name': 'Фёдорова', 'email': 'kate@mail.ru', 'phone': '+7 (999) 444-55-66'},
+        {'first_name': 'Максим', 'last_name': 'Орлов', 'email': 'maxim@mail.ru', 'phone': '+7 (999) 555-66-77'},
+    ]
     
-    visitor2 = Visitor.objects.create(
-        first_name='Ольга',
-        last_name='Новикова',
-        email='olga@mail.ru', 
-        phone='+7 (999) 444-55-66'
-    )
-    
-    visitor3 = Visitor.objects.create(
-        first_name='Дмитрий',
-        last_name='Волков',
-        email='dmitry@mail.ru', 
-        phone='+7 (999) 777-88-99'
-    )
+    visitors = []
+    for data in visitors_data:
+        visitor = Visitor.objects.create(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            email=data['email'],
+            phone=data['phone']
+        )
+        visitors.append(visitor)
     
     print("👤 Посетители созданы")
     
     # ==================== БИЛЕТЫ ====================
-    ticket1 = Ticket.objects.create(
-        visitor=visitor1,
-        ticket_type='adult',
-        valid_date=timezone.now().date(),
-        cashier=cashier_user
-    )
+    ticket_types = ['adult', 'child', 'family', 'vip']
+    cashier_users = CustomUser.objects.filter(role='cashier')
     
-    ticket2 = Ticket.objects.create(
-        visitor=visitor2,
-        ticket_type='family', 
-        valid_date=timezone.now().date(),
-        cashier=admin_user
-    )
-    
-    ticket3 = Ticket.objects.create(
-        visitor=visitor3,
-        ticket_type='vip', 
-        valid_date=timezone.now().date(),
-        cashier=cashier_user
-    )
+    for i, visitor in enumerate(visitors):
+        Ticket.objects.create(
+            visitor=visitor,
+            ticket_type=ticket_types[i % len(ticket_types)],
+            valid_date=timezone.now().date(),
+            cashier=cashier_users[i % cashier_users.count()]
+        )
     
     print("🎫 Билеты созданы")
     
@@ -185,19 +203,24 @@ def create_test_data():
     print(f"🍕 Создано {len(products_data)} товаров")
     
     # ==================== ИТОГ ====================
-    print("\n" + "="*50)
+    print("\n" + "="*60)
     print("✅ Тестовые данные успешно созданы!")
-    print("="*50)
-    print("\n👤 Тестовые пользователи:")
-    print("   🔑 Админ:   login=admin,   password=admin123")
-    print("   🔑 Кассир:  login=cashier, password=cashier123") 
-    print("   🔑 Менеджер: login=manager, password=manager123")
-    print("\n📊 Статистика:")
+    print("="*60)
+    print("\n👤 ПОЛЬЗОВАТЕЛИ:")
+    print("\n🔴 СУПЕР АДМИН:")
+    print("   login=admin       password=admin")
+    print("\n🟢 КАССИРЫ:")
+    for data in employees_cashiers:
+        print(f"   login={data['username']:<10} password={data['password']}")
+    print("\n🟡 АДМИНЫ:")
+    for data in employees_admins:
+        print(f"   login={data['username']:<10} password={data['password']}")
+    print("\n📊 СТАТИСТИКА:")
     print(f"   👥 Сотрудников: {Employee.objects.count()}")
     print(f"   👤 Посетителей: {Visitor.objects.count()}")
     print(f"   🎫 Билетов: {Ticket.objects.count()}")
     print(f"   🍕 Товаров: {Product.objects.count()}")
-    print("="*50)
+    print("="*60)
 
 if __name__ == '__main__':
     create_test_data()
