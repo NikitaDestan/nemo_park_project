@@ -1,68 +1,429 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Ожидание подтверждения - Аквапарк</title>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ожидание подтверждения - Парк Немо</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="manifest" href="{% static 'site.webmanifest' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background: linear-gradient(135deg, #007cba, #00bcd4); 
-            height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .waiting-container { 
-            background: white; 
-            padding: 40px; 
-            border-radius: 10px; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.1); 
-            width: 100%; 
-            max-width: 500px; 
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0c1929 0%, #1a365d 50%, #234e82 100%);
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* Particles.js фон */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        /* Контейнер ожидания */
+        .waiting-container {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 50px 40px;
+            border-radius: 28px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 520px;
             text-align: center;
+            animation: slideUp 0.5s ease-out;
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
-        .icon { 
-            font-size: 64px; 
-            margin-bottom: 20px; 
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .message { 
-            margin: 20px 0; 
-            line-height: 1.6;
+
+        /* Иконка */
+        .waiting-icon {
+            margin-bottom: 25px;
         }
-        .logout-btn {
+
+        .waiting-icon .icon {
+            font-size: 5rem;
             display: inline-block;
-            padding: 10px 20px;
-            background: #007cba;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* Заголовок */
+        .waiting-title {
+            color: #023E8A;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .waiting-subtitle {
+            color: #f39c12;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #f39c12;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Приветствие */
+        .user-welcome {
+            background: linear-gradient(135deg, #e8f4fd 0%, #d4ecfc 100%);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            border: 2px solid #b8daff;
+        }
+
+        .user-welcome .greeting {
+            font-size: 1.2rem;
+            color: #023E8A;
+            margin-bottom: 5px;
+        }
+
+        .user-welcome .username {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0077B6;
+        }
+
+        /* Сообщение */
+        .message-box {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .message-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e8e8e8;
+            color: #444;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .message-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .message-item:first-child {
+            padding-top: 0;
+        }
+
+        .message-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Контакты */
+        .contact-box {
+            background: linear-gradient(135deg, #fff8f0 0%, #fff3e6 100%);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            border: 2px solid #ffd9b3;
+        }
+
+        .contact-title {
+            color: #FF6B35;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .contact-items {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .contact-item a {
+            color: #0077B6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .contact-item a:hover {
+            color: #FF6B35;
+        }
+
+        /* Кнопка выхода */
+        .logout-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #0077B6 0%, #023E8A 100%);
             color: white;
             text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            font-family: 'Nunito', sans-serif;
         }
+
         .logout-btn:hover {
-            background: #005a87;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 119, 182, 0.4);
+        }
+
+        /* Рыбка */
+        .nemo-fish {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 3rem;
+            animation: swim 4s ease-in-out infinite;
+            z-index: 100;
+            cursor: pointer;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        }
+
+        @keyframes swim {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateX(10px) rotate(5deg); }
+            75% { transform: translateX(-10px) rotate(-5deg); }
+        }
+
+        .nemo-fish:hover {
+            transform: scale(1.3);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 520px) {
+            .waiting-container {
+                padding: 35px 25px;
+            }
+
+            .waiting-icon .icon {
+                font-size: 4rem;
+            }
+
+            .waiting-title {
+                font-size: 1.5rem;
+            }
+
+            .user-welcome .username {
+                font-size: 1.3rem;
+            }
+
+            .contact-items {
+                align-items: center;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Particles.js фон -->
+    <div id="particles-js"></div>
+
     <div class="waiting-container">
-        <div class="icon">⏳</div>
-        <h2>Ожидание назначения роли</h2>
-        
-        <div class="message">
-            <p><strong>Привет, {{ user.username }}!</strong></p>
-            <p>Ваша учетная запись успешно зарегистрирована, но пока не имеет назначенной роли.</p>
-            <p>Ожидайте, пока администратор назначит вам роль (Кассир или Администратор).</p>
-            <p>После назначения роли вы получите доступ к функционалу системы.</p>
+        <!-- Иконка -->
+        <div class="waiting-icon">
+            <span class="icon">⏳</span>
         </div>
         
-        <div class="contact-info">
-            <p>Если прошло более 24 часов, свяжитесь с администратором:</p>
-            <p><strong>📧 admin@aquapark.ru</strong></p>
-            <p><strong>📞 +7 (999) 123-45-67</strong></p>
+        <!-- Заголовок -->
+        <h1 class="waiting-title">Ожидание назначения роли</h1>
+        <div class="waiting-subtitle">
+            <span class="status-dot"></span>
+            <span>Заявка на рассмотрении</span>
         </div>
         
-        <a href="{% url 'logout' %}" class="logout-btn">Выйти из системы</a>
+        <!-- Приветствие -->
+        <div class="user-welcome">
+            <div class="greeting">Привет! 👋</div>
+            <div class="username">{{ user.username }}</div>
+        </div>
+        
+        <!-- Сообщение -->
+        <div class="message-box">
+            <div class="message-item">
+                <span class="message-icon">✅</span>
+                <span>Ваша учётная запись <strong>успешно зарегистрирована</strong></span>
+            </div>
+            <div class="message-item">
+                <span class="message-icon">⏳</span>
+                <span>Ожидайте назначения роли <strong>администратором</strong></span>
+            </div>
+            <div class="message-item">
+                <span class="message-icon">🎫</span>
+                <span>После назначения роли вы получите доступ к <strong>системе управления парком</strong></span>
+            </div>
+        </div>
+        
+        <!-- Контакты -->
+        <div class="contact-box">
+            <div class="contact-title">📞 Если прошло более 24 часов, свяжитесь с нами:</div>
+            <div class="contact-items">
+                <div class="contact-item">
+                    📧 <a href="mailto:admin@nemopark.ru">admin@nemopark.ru</a>
+                </div>
+                <div class="contact-item">
+                    📱 <a href="tel:+79991234567">+7 (999) 123-45-67</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Кнопка выхода -->
+        <a href="{% url 'logout' %}" class="logout-btn">
+            🚪 Выйти из системы
+        </a>
     </div>
+
+    <!-- Плавающая рыбка -->
+    <div class="nemo-fish" title="Немо ждёт вместе с вами! 🐠">🐠</div>
+
+    <!-- Инициализация Particles.js -->
+    <script>
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 160,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#0077ff"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 2,
+                        "color": "#0077ff"
+                    }
+                },
+                "opacity": {
+                    "value": 0.8,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 1,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true
+                },
+                "line_linked": {
+                    "enable": false
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 1,
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "bubble"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "repulse"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "bubble": {
+                        "distance": 250,
+                        "size": 0,
+                        "duration": 2,
+                        "opacity": 0,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 400,
+                        "duration": 0.4
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+    </script>
 </body>
 </html>

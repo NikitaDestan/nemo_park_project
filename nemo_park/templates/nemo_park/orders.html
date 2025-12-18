@@ -1,0 +1,135 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Заказы{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">🛒 Заказы</h2>
+    <a href="{% url 'create_order' %}" class="btn btn-success">
+        ➕ Новый заказ
+    </a>
+</div>
+
+<!-- Статистика -->
+<div class="mini-stats">
+    <div class="mini-stat">
+        <span class="mini-stat-icon">🛒</span>
+        <span class="mini-stat-number">{{ total_orders }}</span>
+        <span class="mini-stat-label">Всего заказов</span>
+    </div>
+    <div class="mini-stat pending">
+        <span class="mini-stat-icon">⏳</span>
+        <span class="mini-stat-number">{{ pending_orders }}</span>
+        <span class="mini-stat-label">В обработке</span>
+    </div>
+    <div class="mini-stat revenue">
+        <span class="mini-stat-icon">💰</span>
+        <span class="mini-stat-number">{{ total_revenue }} ₽</span>
+        <span class="mini-stat-label">Выручка</span>
+    </div>
+</div>
+
+<!-- Таблица заказов -->
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>👤 Посетитель</th>
+                <th>🍕 Товары</th>
+                <th>💰 Сумма</th>
+                <th>📊 Статус</th>
+                <th>💳 Кассир</th>
+                <th>📅 Дата</th>
+                <th>⚙️</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td><strong>#{{ order.id }}</strong></td>
+                <td>
+                    {% if order.visitor %}
+                        {{ order.visitor.first_name }} {{ order.visitor.last_name }}
+                    {% else %}
+                        <span class="text-muted">Без посетителя</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="items-count">{{ order.orderitem_set.count }} шт.</span>
+                </td>
+                <td>
+                    <span class="price">{{ order.total_price }} ₽</span>
+                </td>
+                <td>
+                    <span class="status-badge status-{{ order.status }}">
+                        {% if order.status == 'pending' %}⏳ В обработке
+                        {% elif order.status == 'preparing' %}👨‍🍳 Готовится
+                        {% elif order.status == 'ready' %}✅ Готов
+                        {% elif order.status == 'delivered' %}📦 Выдан
+                        {% elif order.status == 'cancelled' %}❌ Отменён
+                        {% endif %}
+                    </span>
+                </td>
+                <td>{{ order.cashier.username }}</td>
+                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                <td>
+                    <div class="actions">
+                        <a href="{% url 'order_detail' order.id %}" class="action-btn view-btn" title="Подробнее">👁️</a>
+                        {% if user.role == 'admin' %}
+                        <a href="{% url 'delete_order' order.id %}" class="action-btn delete-btn" title="Удалить">🗑️</a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">
+                    <div class="empty-state">
+                        <div class="empty-icon">🛒</div>
+                        <h3>Нет заказов</h3>
+                        <p>Создайте первый заказ</p>
+                        <a href="{% url 'create_order' %}" class="btn btn-success">➕ Новый заказ</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    
+    .mini-stats { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+    .mini-stat { background: #f8fafc; padding: 18px 28px; border-radius: 16px; text-align: center; border: 2px solid #e8e8e8; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .mini-stat.pending { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); border: none; color: white; }
+    .mini-stat.revenue { background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); border: none; color: white; }
+    .mini-stat-icon { font-size: 1.8rem; }
+    .mini-stat-number { font-size: 1.8rem; font-weight: 800; }
+    .mini-stat-label { font-size: 0.85rem; opacity: 0.9; }
+    
+    .items-count { background: #f0f7ff; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; color: #0077B6; font-weight: 600; }
+    .price { font-weight: 800; color: #00b894; font-size: 1.1rem; }
+    .text-muted { color: #999; }
+    
+    .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-preparing { background: #cce5ff; color: #004085; }
+    .status-ready { background: #d4edda; color: #155724; }
+    .status-delivered { background: #e8f8f5; color: #00b894; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    
+    .actions { display: flex; gap: 8px; }
+    .action-btn { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1rem; transition: all 0.2s ease; }
+    .action-btn.view-btn { background: #f0f7ff; }
+    .action-btn.view-btn:hover { background: #0077B6; transform: scale(1.1); }
+    .action-btn.delete-btn { background: #fff5f5; }
+    .action-btn.delete-btn:hover { background: #e74c3c; transform: scale(1.1); }
+    
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-icon { font-size: 4rem; margin-bottom: 15px; }
+    .empty-state h3 { color: #333; margin-bottom: 10px; }
+    .empty-state p { color: #666; margin-bottom: 20px; }
+</style>
+{% endblock %}

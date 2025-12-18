@@ -1,0 +1,267 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Новый заказ{% endblock %}
+
+{% block content %}
+<div class="order-page">
+    <div class="order-header">
+        <a href="{% url 'orders' %}" class="back-link">← Назад к заказам</a>
+        <h2 class="page-title">🛒 Новый заказ</h2>
+    </div>
+    
+    <div class="order-container">
+        <!-- Левая часть: Меню -->
+        <div class="menu-section">
+            <h3>🍕 Выберите товары</h3>
+            
+            {% for category_name, category_products in categories.items %}
+            <div class="menu-category">
+                <h4 class="category-title">{{ category_name }}</h4>
+                <div class="menu-items">
+                    {% for product in category_products %}
+                    <div class="menu-item" 
+                         data-id="{{ product.id }}" 
+                         data-name="{{ product.name }}" 
+                         data-price="{{ product.price }}" 
+                         data-emoji="{{ product.image_emoji }}"
+                         onclick="addItemFromElement(this)">
+                        <span class="item-emoji">{{ product.image_emoji }}</span>
+                        <div class="item-info">
+                            <span class="item-name">{{ product.name }}</span>
+                            <span class="item-price">{{ product.price }} ₽</span>
+                        </div>
+                        <button type="button" class="add-btn">+</button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Правая часть: Корзина -->
+        <div class="cart-section">
+            <h3>🧾 Корзина</h3>
+            
+            <form method="post" id="order-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label>👤 Посетитель (необязательно)</label>
+                    <select name="visitor" class="form-control">
+                        <option value="">-- Без посетителя --</option>
+                        {% for visitor in visitors %}
+                        <option value="{{ visitor.id }}">{{ visitor.first_name }} {{ visitor.last_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="cart-items" id="cart-items">
+                    <div class="empty-cart">
+                        <span>🛒</span>
+                        <p>Корзина пуста</p>
+                    </div>
+                </div>
+                
+                <div class="cart-total">
+                    <span>Итого:</span>
+                    <span class="total-price" id="total-price">0 ₽</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>📝 Примечания</label>
+                    <textarea name="notes" class="form-control" rows="2" placeholder="Особые пожелания..."></textarea>
+                </div>
+                
+                <input type="hidden" name="order_items" id="order-items-input">
+                
+                <div class="cart-actions">
+                    <button type="submit" class="btn btn-success btn-block" id="submit-btn" disabled>
+                        ✅ Оформить заказ
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-block" onclick="clearCart()">
+                        🗑️ Очистить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .order-page { max-width: 1200px; margin: 0 auto; }
+    .order-header { margin-bottom: 25px; }
+    .back-link { color: #0077B6; text-decoration: none; font-weight: 600; }
+    .back-link:hover { color: #FF6B35; }
+    
+    .order-container { display: grid; grid-template-columns: 1fr 400px; gap: 30px; }
+    
+    /* Меню */
+    .menu-section { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); }
+    .menu-section h3 { color: #023E8A; margin-bottom: 20px; }
+    .menu-category { margin-bottom: 25px; }
+    .category-title { color: #FF6B35; font-size: 1rem; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #FF6B35; }
+    .menu-items { display: flex; flex-direction: column; gap: 10px; }
+    .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; background: #f8fafc; border-radius: 12px; transition: all 0.2s ease; cursor: pointer; }
+    .menu-item:hover { background: #e8f4fd; transform: translateX(5px); }
+    .item-emoji { font-size: 1.8rem; }
+    .item-info { flex: 1; }
+    .item-name { display: block; font-weight: 600; color: #333; }
+    .item-price { font-size: 0.9rem; color: #00b894; font-weight: 700; }
+    .add-btn { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00b894, #00cec9); color: white; border: none; font-size: 1.5rem; cursor: pointer; transition: all 0.2s ease; }
+    .add-btn:hover { transform: scale(1.1); box-shadow: 0 5px 15px rgba(0,184,148,0.4); }
+    
+    /* Корзина */
+    .cart-section { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); position: sticky; top: 20px; height: fit-content; }
+    .cart-section h3 { color: #023E8A; margin-bottom: 20px; }
+    .cart-items { min-height: 200px; max-height: 350px; overflow-y: auto; margin-bottom: 20px; }
+    .empty-cart { text-align: center; padding: 40px 20px; color: #999; }
+    .empty-cart span { font-size: 3rem; display: block; margin-bottom: 10px; }
+    
+    .cart-item { display: flex; align-items: center; gap: 10px; padding: 12px; background: #f8fafc; border-radius: 10px; margin-bottom: 10px; }
+    .cart-item-emoji { font-size: 1.5rem; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-weight: 600; font-size: 0.9rem; }
+    .cart-item-price { font-size: 0.85rem; color: #00b894; }
+    .cart-item-qty { display: flex; align-items: center; gap: 8px; }
+    .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer; font-weight: bold; transition: all 0.2s ease; }
+    .qty-btn.minus { background: #fee2e2; color: #e74c3c; }
+    .qty-btn.plus { background: #d4edda; color: #00b894; }
+    .qty-btn:hover { transform: scale(1.1); }
+    .qty-value { font-weight: 700; min-width: 24px; text-align: center; }
+    .remove-btn { background: none; border: none; cursor: pointer; font-size: 1.2rem; opacity: 0.5; }
+    .remove-btn:hover { opacity: 1; }
+    
+    .cart-total { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: linear-gradient(135deg, #023E8A, #0077B6); border-radius: 12px; color: white; margin-bottom: 20px; }
+    .total-price { font-size: 1.5rem; font-weight: 800; }
+    
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #023E8A; font-size: 0.9rem; }
+    .form-control { width: 100%; padding: 12px; border: 2px solid #e8e8e8; border-radius: 10px; font-size: 1rem; }
+    .form-control:focus { border-color: #0077B6; outline: none; }
+    
+    .cart-actions { display: flex; flex-direction: column; gap: 10px; }
+    .btn-block { width: 100%; justify-content: center; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    @media (max-width: 900px) {
+        .order-container { grid-template-columns: 1fr; }
+        .cart-section { position: static; }
+    }
+</style>
+
+<script>
+// Корзина
+var cart = [];
+
+// Добавление товара через data-атрибуты элемента
+function addItemFromElement(element) {
+    var id = parseInt(element.getAttribute('data-id'));
+    var name = element.getAttribute('data-name');
+    var price = parseFloat(element.getAttribute('data-price'));
+    var emoji = element.getAttribute('data-emoji');
+    
+    addToCart(id, name, price, emoji);
+}
+
+// Добавление в корзину
+function addToCart(id, name, price, emoji) {
+    var existing = null;
+    for (var i = 0; i < cart.length; i++) {
+        if (cart[i].product_id === id) {
+            existing = cart[i];
+            break;
+        }
+    }
+    
+    if (existing) {
+        existing.quantity++;
+    } else {
+        cart.push({
+            product_id: id,
+            name: name,
+            price: price,
+            emoji: emoji,
+            quantity: 1
+        });
+    }
+    updateCartUI();
+}
+
+// Удаление из корзины
+function removeFromCart(id) {
+    var newCart = [];
+    for (var i = 0; i < cart.length; i++) {
+        if (cart[i].product_id !== id) {
+            newCart.push(cart[i]);
+        }
+    }
+    cart = newCart;
+    updateCartUI();
+}
+
+// Изменение количества
+function updateQuantity(id, delta) {
+    for (var i = 0; i < cart.length; i++) {
+        if (cart[i].product_id === id) {
+            cart[i].quantity += delta;
+            if (cart[i].quantity <= 0) {
+                removeFromCart(id);
+                return;
+            }
+            break;
+        }
+    }
+    updateCartUI();
+}
+
+// Очистка корзины
+function clearCart() {
+    cart = [];
+    updateCartUI();
+}
+
+// Обновление UI корзины
+function updateCartUI() {
+    var container = document.getElementById('cart-items');
+    var totalEl = document.getElementById('total-price');
+    var inputEl = document.getElementById('order-items-input');
+    var submitBtn = document.getElementById('submit-btn');
+    
+    if (cart.length === 0) {
+        container.innerHTML = '<div class="empty-cart"><span>🛒</span><p>Корзина пуста</p></div>';
+        totalEl.textContent = '0 ₽';
+        inputEl.value = '[]';
+        submitBtn.disabled = true;
+        return;
+    }
+    
+    var html = '';
+    var total = 0;
+    
+    for (var i = 0; i < cart.length; i++) {
+        var item = cart[i];
+        var itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        
+        html += '<div class="cart-item">';
+        html += '<span class="cart-item-emoji">' + item.emoji + '</span>';
+        html += '<div class="cart-item-info">';
+        html += '<div class="cart-item-name">' + item.name + '</div>';
+        html += '<div class="cart-item-price">' + item.price + ' ₽ × ' + item.quantity + ' = ' + itemTotal + ' ₽</div>';
+        html += '</div>';
+        html += '<div class="cart-item-qty">';
+        html += '<button type="button" class="qty-btn minus" onclick="updateQuantity(' + item.product_id + ', -1)">−</button>';
+        html += '<span class="qty-value">' + item.quantity + '</span>';
+        html += '<button type="button" class="qty-btn plus" onclick="updateQuantity(' + item.product_id + ', 1)">+</button>';
+        html += '</div>';
+        html += '<button type="button" class="remove-btn" onclick="removeFromCart(' + item.product_id + ')">🗑️</button>';
+        html += '</div>';
+    }
+    
+    container.innerHTML = html;
+    totalEl.textContent = total + ' ₽';
+    inputEl.value = JSON.stringify(cart);
+    submitBtn.disabled = false;
+}
+</script>
+{% endblock %}

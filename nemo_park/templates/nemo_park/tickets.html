@@ -3,37 +3,413 @@
 {% block title %}Билеты{% endblock %}
 
 {% block content %}
-<h2>🎫 Список билетов</h2>
+<div class="page-header">
+    <h2 class="page-title">🎫 Список билетов</h2>
+    <a href="{% url 'add_ticket' %}" class="btn btn-warning">
+        🎫 Продать билет
+    </a>
+</div>
 
-<table>
-    <tr>
-        <th>Посетитель</th>
-        <th>Тип билета</th>
-        <th>Цена</th>
-        <th>Дата покупки</th>
-        <th>Действителен до</th>
-        <th>Кассир</th>
-        <th>Действия</th>
-    </tr>
-    {% for ticket in tickets %}
-    <tr>
-        <td>{{ ticket.visitor.first_name }} {{ ticket.visitor.last_name }}</td>
-        <td>{{ ticket.get_ticket_type_display }}</td>
-        <td>{{ ticket.price }} руб.</td>
-        <td>{{ ticket.purchase_date|date:"d.m.Y H:i" }}</td>
-        <td>{{ ticket.valid_date|date:"d.m.Y" }}</td>
-        <td>{{ ticket.cashier.username }}</td>
-        <td>
-            <a href="{% url 'edit_ticket' ticket.id %}" style="color: #007cba; text-decoration: none;">✏️</a>
-            <a href="{% url 'delete_ticket' ticket.id %}" style="color: #dc3545; text-decoration: none; margin-left: 10px;">🗑️</a>
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="7" style="text-align: center;">Нет билетов</td>
-    </tr>
-    {% endfor %}
-</table>
-<br>
-<a href="{% url 'add_ticket' %}">➕ Продать новый билет</a>
+<!-- Статистика билетов -->
+<div class="mini-stats">
+    <div class="mini-stat tickets-stat">
+        <span class="mini-stat-icon">🎫</span>
+        <span class="mini-stat-number">{{ tickets|length }}</span>
+        <span class="mini-stat-label">Всего билетов</span>
+    </div>
+    <div class="mini-stat revenue-stat">
+        <span class="mini-stat-icon">💰</span>
+        <span class="mini-stat-number" id="total-revenue">
+            {% widthratio tickets|length 1 1 as count %}
+            {{ tickets|length }}
+        </span>
+        <span class="mini-stat-label">Продано сегодня</span>
+    </div>
+</div>
+
+<!-- Таблица билетов -->
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>👤 Посетитель</th>
+                <th>🎟️ Тип билета</th>
+                <th>💰 Цена</th>
+                <th>📅 Дата покупки</th>
+                <th>⏰ Действителен до</th>
+                <th>💳 Кассир</th>
+                <th>⚙️ Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in tickets %}
+            <tr>
+                <td>
+                    <div class="user-cell">
+                        <div class="user-avatar ticket-avatar">
+                            {{ ticket.visitor.first_name|slice:":1" }}{{ ticket.visitor.last_name|slice:":1" }}
+                        </div>
+                        <div class="user-info-cell">
+                            <span class="user-name">{{ ticket.visitor.first_name }} {{ ticket.visitor.last_name }}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    {% if ticket.ticket_type == 'vip' %}
+                        <span class="ticket-badge vip">👑 VIP</span>
+                    {% elif ticket.ticket_type == 'family' %}
+                        <span class="ticket-badge family">👨‍👩‍👧 Семейный</span>
+                    {% elif ticket.ticket_type == 'child' %}
+                        <span class="ticket-badge child">🧒 Детский</span>
+                    {% else %}
+                        <span class="ticket-badge adult">🎫 Взрослый</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="price">{{ ticket.price }} ₽</span>
+                </td>
+                <td>
+                    <div class="date-cell">
+                        <span class="date-main">{{ ticket.purchase_date|date:"d.m.Y" }}</span>
+                        <span class="date-time">{{ ticket.purchase_date|date:"H:i" }}</span>
+                    </div>
+                </td>
+                <td>
+                    {% now "Y-m-d" as today %}
+                    {% if ticket.valid_date|date:"Y-m-d" < today %}
+                        <span class="validity expired">
+                            <span class="validity-icon">❌</span>
+                            {{ ticket.valid_date|date:"d.m.Y" }}
+                        </span>
+                    {% else %}
+                        <span class="validity valid">
+                            <span class="validity-icon">✅</span>
+                            {{ ticket.valid_date|date:"d.m.Y" }}
+                        </span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="cashier-cell">
+                        <span class="cashier-badge">💳 {{ ticket.cashier.username }}</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="actions">
+                        <a href="{% url 'edit_ticket' ticket.id %}" class="action-btn edit-btn" title="Редактировать">
+                            ✏️
+                        </a>
+                        <a href="{% url 'delete_ticket' ticket.id %}" class="action-btn delete-btn" title="Удалить">
+                            🗑️
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">
+                    <div class="empty-state">
+                        <div class="empty-icon">🎫</div>
+                        <h3>Нет проданных билетов</h3>
+                        <p>Продайте первый билет в парк «Немо»</p>
+                        <a href="{% url 'add_ticket' %}" class="btn btn-warning">
+                            🎫 Продать билет
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    /* Заголовок страницы */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .page-title {
+        margin: 0;
+    }
+
+    /* Мини-статистика */
+    .mini-stats {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+
+    .mini-stat {
+        background: #f8fafc;
+        padding: 18px 28px;
+        border-radius: 16px;
+        text-align: center;
+        border: 2px solid #e8e8e8;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .mini-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .mini-stat.tickets-stat {
+        background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+        border: none;
+        color: white;
+    }
+
+    .mini-stat.revenue-stat {
+        background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        border: none;
+        color: white;
+    }
+
+    .mini-stat-icon {
+        font-size: 1.8rem;
+    }
+
+    .mini-stat-number {
+        font-size: 1.8rem;
+        font-weight: 800;
+    }
+
+    .mini-stat-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    /* Ячейка с посетителем */
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, #0077B6 0%, #023E8A 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .ticket-avatar {
+        background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+    }
+
+    .user-info-cell {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: 700;
+        color: #333;
+    }
+
+    /* Бейджи типов билетов */
+    .ticket-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .ticket-badge.vip {
+        background: linear-gradient(135deg, #f7931e 0%, #f39c12 100%);
+        color: white;
+        box-shadow: 0 3px 10px rgba(247, 147, 30, 0.3);
+    }
+
+    .ticket-badge.family {
+        background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        color: white;
+    }
+
+    .ticket-badge.child {
+        background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        color: white;
+    }
+
+    .ticket-badge.adult {
+        background: linear-gradient(135deg, #0077B6 0%, #023E8A 100%);
+        color: white;
+    }
+
+    /* Цена */
+    .price {
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: #00b894;
+    }
+
+    /* Дата */
+    .date-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .date-main {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .date-time {
+        font-size: 0.8rem;
+        color: #999;
+    }
+
+    /* Валидность */
+    .validity {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .validity.valid {
+        background: #e8f8f5;
+        color: #00b894;
+    }
+
+    .validity.expired {
+        background: #fdf2f2;
+        color: #e74c3c;
+    }
+
+    .validity-icon {
+        font-size: 0.9rem;
+    }
+
+    /* Кассир */
+    .cashier-cell {
+        display: flex;
+        align-items: center;
+    }
+
+    .cashier-badge {
+        background: #f0f7ff;
+        color: #0077B6;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* Кнопки действий */
+    .actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn.edit-btn {
+        background: #f0f7ff;
+    }
+
+    .action-btn.edit-btn:hover {
+        background: #0077B6;
+        transform: scale(1.15);
+        box-shadow: 0 5px 15px rgba(0, 119, 182, 0.3);
+    }
+
+    .action-btn.delete-btn {
+        background: #fff5f5;
+    }
+
+    .action-btn.delete-btn:hover {
+        background: #e74c3c;
+        transform: scale(1.15);
+        box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+    }
+
+    /* Пустое состояние */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .empty-state h3 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 1.3rem;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 1100px) {
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 850px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .mini-stats {
+            width: 100%;
+        }
+
+        .mini-stat {
+            flex: 1;
+            min-width: 140px;
+        }
+    }
+</style>
 {% endblock %}

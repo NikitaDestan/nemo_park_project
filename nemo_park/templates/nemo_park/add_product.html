@@ -1,0 +1,83 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Добавить товар{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-header">
+        <a href="{% url 'products' %}" class="back-link">← Назад к меню</a>
+        <h2 class="page-title">🍕 Новый товар</h2>
+        <p class="page-subtitle">Добавьте товар в меню парка «Немо»</p>
+    </div>
+    
+    <div class="form-card">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-icon"><span>🍽️</span></div>
+            
+            <div class="form-section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>🏷️ Название</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="form-group">
+                        <label>📁 Категория</label>
+                        {{ form.category }}
+                    </div>
+                    <div class="form-group">
+                        <label>💰 Цена (₽)</label>
+                        {{ form.price }}
+                    </div>
+                    <div class="form-group">
+                        <label>😀 Иконка</label>
+                        {{ form.image_emoji }}
+                    </div>
+                    <div class="form-group full-width">
+                        <label>📝 Описание</label>
+                        {{ form.description }}
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            {{ form.is_available }} В наличии
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            {{ form.is_popular }} 🔥 Популярное
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">✅ Добавить товар</button>
+                <a href="{% url 'products' %}" class="btn btn-secondary">↩️ Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-page { max-width: 600px; margin: 0 auto; }
+    .form-header { margin-bottom: 25px; }
+    .back-link { color: #0077B6; text-decoration: none; font-weight: 600; }
+    .back-link:hover { color: #FF6B35; }
+    .page-subtitle { color: #666; margin-top: 5px; }
+    .form-card { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+    .form-icon { text-align: center; font-size: 3rem; margin-bottom: 20px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    .form-group label { font-weight: 700; color: #023E8A; margin-bottom: 8px; }
+    .form-group input, .form-group select, .form-group textarea { padding: 12px 16px; border: 2px solid #e8e8e8; border-radius: 12px; font-size: 1rem; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #0077B6; outline: none; }
+    .checkbox-label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .form-actions { display: flex; gap: 15px; margin-top: 25px; padding-top: 20px; border-top: 2px solid #f0f0f0; }
+    .btn { padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; border: none; cursor: pointer; }
+    .btn-success { background: linear-gradient(135deg, #00b894, #00cec9); color: white; flex: 1; text-align: center; }
+    .btn-secondary { background: #f0f0f0; color: #333; }
+    @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}

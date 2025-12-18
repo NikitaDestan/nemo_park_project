@@ -3,34 +3,321 @@
 {% block title %}Добавить посетителя{% endblock %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 0 auto;">
-    <h2>👤 Добавить посетителя</h2>
+<div class="form-page">
+    <!-- Заголовок -->
+    <div class="form-header">
+        <a href="{% url 'visitors' %}" class="back-link">
+            ← Назад к списку
+        </a>
+        <h2 class="page-title">👤 Новый посетитель</h2>
+        <p class="page-subtitle">Зарегистрируйте нового гостя парка «Немо»</p>
+    </div>
     
-    <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+    <!-- Форма -->
+    <div class="form-card">
         <form method="post">
             {% csrf_token %}
             
-            {% for field in form %}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ field.label }}</label>
-                {{ field }}
-                {% if field.errors %}
-                <div style="color: red; font-size: 14px; margin-top: 5px;">
-                    {{ field.errors }}
-                </div>
-                {% endif %}
+            <!-- Иконка -->
+            <div class="form-icon">
+                <span>🐠</span>
             </div>
-            {% endfor %}
             
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="submit" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    ➕ Добавить посетителя
+            <!-- Поля формы -->
+            <div class="form-section">
+                <div class="form-grid">
+                    {% for field in form %}
+                    <div class="form-group {% if field.name == 'email' %}full-width{% endif %}">
+                        <label for="{{ field.id_for_label }}">
+                            {% if field.name == 'first_name' %}👤{% endif %}
+                            {% if field.name == 'last_name' %}👤{% endif %}
+                            {% if field.name == 'email' %}📧{% endif %}
+                            {% if field.name == 'phone' %}📱{% endif %}
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <div class="field-error">
+                            {% for error in field.errors %}
+                                <span>❌ {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Информационный блок -->
+            <div class="info-box visitor-info">
+                <div class="info-icon">🎢</div>
+                <div class="info-content">
+                    <h4>Добро пожаловать в «Немо»!</h4>
+                    <p>После регистрации посетитель сможет приобретать билеты на все аттракционы парка.</p>
+                </div>
+            </div>
+            
+            <!-- Кнопки -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">
+                    ✅ Зарегистрировать гостя
                 </button>
-                <a href="{% url 'visitors' %}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
-                    ↩️ Назад
+                <a href="{% url 'visitors' %}" class="btn btn-secondary">
+                    ↩️ Отмена
                 </a>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    /* Страница формы */
+    .form-page {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* Заголовок формы */
+    .form-header {
+        margin-bottom: 25px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #0077B6;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+        color: #FF6B35;
+        transform: translateX(-5px);
+    }
+
+    .page-title {
+        margin: 0 0 8px 0;
+    }
+
+    .page-subtitle {
+        color: #666;
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* Карточка формы */
+    .form-card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px 35px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Декоративная волна */
+    .form-card::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #00b894, #00cec9, #0077B6, #667eea);
+    }
+
+    /* Иконка формы */
+    .form-icon {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .form-icon span {
+        font-size: 4rem;
+        display: inline-block;
+        animation: swim 3s ease-in-out infinite;
+    }
+
+    @keyframes swim {
+        0%, 100% { transform: translateX(0) rotate(0deg); }
+        25% { transform: translateX(10px) rotate(5deg); }
+        75% { transform: translateX(-10px) rotate(-5deg); }
+    }
+
+    /* Секция формы */
+    .form-section {
+        margin-bottom: 25px;
+    }
+
+    /* Сетка формы */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        color: #023E8A;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 14px 18px;
+        border: 2px solid #e8e8e8;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: 'Nunito', sans-serif;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #00b894;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(0, 184, 148, 0.1);
+    }
+
+    /* Ошибки полей */
+    .field-error {
+        margin-top: 8px;
+        padding: 10px 12px;
+        background: #fff5f5;
+        border-radius: 8px;
+        border-left: 3px solid #e74c3c;
+    }
+
+    .field-error span {
+        color: #c0392b;
+        font-size: 0.85rem;
+        display: block;
+    }
+
+    /* Информационный блок */
+    .info-box {
+        display: flex;
+        gap: 15px;
+        background: linear-gradient(135deg, #e8fff9 0%, #d4f8ef 100%);
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 25px;
+        border: 2px solid #a8e6cf;
+    }
+
+    .info-box.visitor-info {
+        background: linear-gradient(135deg, #e8fff9 0%, #d4f8ef 100%);
+        border-color: #a8e6cf;
+    }
+
+    .info-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+    }
+
+    .info-content h4 {
+        margin: 0 0 8px 0;
+        color: #00b894;
+        font-size: 1rem;
+    }
+
+    .info-content p {
+        margin: 0;
+        color: #444;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* Кнопки */
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .btn {
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        color: white;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 184, 148, 0.4);
+    }
+
+    .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #e0e0e0;
+        transform: translateY(-2px);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 550px) {
+        .form-card {
+            padding: 30px 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .info-box {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .form-icon span {
+            font-size: 3rem;
+        }
+    }
+</style>
 {% endblock %}

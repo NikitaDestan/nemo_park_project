@@ -3,7 +3,9 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Employee, Visitor, Ticket, CustomUser
-from .forms import LoginForm, RegisterForm, EmployeeForm, VisitorForm, TicketForm, EditEmployeeForm 
+from .models import Employee, Visitor, Ticket, CustomUser, Product, Order, OrderItem
+import json
+from .forms import LoginForm, RegisterForm, EmployeeForm, VisitorForm, TicketForm, EditEmployeeForm, ProductForm
 
 def user_has_role(user):
     return user.is_authenticated and user.role != 'user'
@@ -347,3 +349,232 @@ def delete_ticket(request, ticket_id):
         return redirect('tickets')
     
     return render(request, 'nemo_park/delete_ticket.html', {'ticket': ticket})
+
+    # ==================== ТОВАРЫ ====================
+
+@login_required
+def products_list(request):
+    if request.user.role == 'user':
+        return render(request, 'nemo_park/waiting_approval.html')
+    
+    products = Product.objects.all().order_by('category', 'name')
+    
+    # Группируем по категориям
+    categories = {}
+    for product in products:
+        cat = product.get_category_display()
+        if cat not in categories:
+            categories[cat] = []
+        categories[cat].append(product)
+    
+    context = {
+        'products': products,
+        'categories': categories,
+        'total_products': products.count(),
+        'available_products': products.filter(is_available=True).count(),
+    }
+    return render(request, 'nemo_park/products.html', context)
+
+
+@login_required
+def add_product(request):
+    if request.user.role != 'admin':
+        messages.error(request, 'У вас нет прав для добавления товаров')
+        return redirect('products')
+    
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Товар успешно добавлен!')
+            return redirect('products')
+    else:
+        form = ProductForm()
+    
+    return render(request, 'nemo_park/add_product.html', {'form': form})
+
+
+@login_required
+def edit_product(request, product_id):
+    if request.user.role != 'admin':
+        messages.error(request, 'У вас нет прав для редактирования товаров')
+        return redirect('products')
+    
+    product = get_object_or_404(Product, id=product_id)
+    
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Товар "{product.name}" успешно обновлён!')
+            return redirect('products')
+    else:
+        form = ProductForm(instance=product)
+    
+    return render(request, 'nemo_park/edit_product.html', {'form': form, 'product': product})
+
+
+@login_required
+def delete_product(request, product_id):
+    if request.user.role != 'admin':
+        messages.error(request, 'У вас нет прав для удаления товаров')
+        return redirect('products')
+    
+    product = get_object_or_404(Product, id=product_id)
+    
+    if request.method == 'POST':
+        product_name = product.name
+        product.delete()
+        messages.success(request, f'Товар "{product_name}" успешно удалён!')
+        return redirect('products')
+    
+    return render(request, 'nemo_park/delete_product.html', {'product': product})
+
+# ==================== ЗАКАЗЫ ====================
+
+@login_required
+def orders_list(request):
+    if request.user.role == 'user':
+        return render(request, 'nemo_park/waiting_approval.html')
+    
+    if request.user.role == 'admin':
+        orders = Order.objects.all().order_by('-created_at')
+    else:
+        orders = Order.objects.filter(cashier=request.user).order_by('-created_at')
+    
+    # Статистика
+    total_orders = orders.count()
+    total_revenue = sum(order.total_price for order in orders)
+    pending_orders = orders.filter(status='pending').count()
+    
+    context = {
+        'orders': orders,
+        'total_orders': total_orders,
+        'total_revenue': total_revenue,
+        'pending_orders': pending_orders,
+    }
+    return render(request, 'nemo_park/orders.html', context)
+
+
+@login_required
+def create_order(request):
+    if request.user.role == 'user':
+        return render(request, 'nemo_park/waiting_approval.html')
+    
+    products = Product.objects.filter(is_available=True).order_by('category', 'name')
+    visitors = Visitor.objects.all()
+    
+    # Группируем по категориям
+    categories = {}
+    for product in products:
+        cat = product.get_category_display()
+        if cat not in categories:
+            categories[cat] = []
+        categories[cat].append(product)
+    
+    if request.method == 'POST':
+        visitor_id = request.POST.get('visitor')
+        notes = request.POST.get('notes', '')
+        items_json = request.POST.get('order_items', '[]')
+        
+        try:
+            items = json.loads(items_json)
+        except:
+            items = []
+        
+        if not items:
+            messages.error(request, 'Добавьте хотя бы один товар в заказ')
+            return render(request, 'nemo_park/create_order.html', {
+                'products': products,
+                'categories': categories,
+                'visitors': visitors,
+            })
+        
+        # Создаём заказ
+        order = Order.objects.create(
+            visitor_id=visitor_id if visitor_id else None,
+            cashier=request.user,
+            notes=notes,
+            total_price=0
+        )
+        
+        # Добавляем товары
+        total = 0
+        for item in items:
+            product = Product.objects.get(id=item['product_id'])
+            quantity = int(item['quantity'])
+            price = product.price
+            
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=quantity,
+                price=price
+            )
+            total += price * quantity
+        
+        order.total_price = total
+        order.save()
+        
+        messages.success(request, f'Заказ #{order.id} создан! Сумма: {total} ₽')
+        return redirect('orders')
+    
+    return render(request, 'nemo_park/create_order.html', {
+        'products': products,
+        'categories': categories,
+        'visitors': visitors,
+    })
+
+
+@login_required
+def order_detail(request, order_id):
+    if request.user.role == 'user':
+        return render(request, 'nemo_park/waiting_approval.html')
+    
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Кассир может видеть только свои заказы
+    if request.user.role == 'cashier' and order.cashier != request.user:
+        messages.error(request, 'Вы можете просматривать только свои заказы')
+        return redirect('orders')
+    
+    items = order.orderitem_set.all()
+    
+    return render(request, 'nemo_park/order_detail.html', {
+        'order': order,
+        'items': items,
+    })
+
+
+@login_required
+def update_order_status(request, order_id):
+    if request.user.role == 'user':
+        return render(request, 'nemo_park/waiting_approval.html')
+    
+    order = get_object_or_404(Order, id=order_id)
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(Order.STATUS_CHOICES):
+            order.status = new_status
+            order.save()
+            messages.success(request, f'Статус заказа #{order.id} обновлён')
+    
+    return redirect('order_detail', order_id=order_id)
+
+
+@login_required
+def delete_order(request, order_id):
+    if request.user.role != 'admin':
+        messages.error(request, 'У вас нет прав для удаления заказов')
+        return redirect('orders')
+    
+    order = get_object_or_404(Order, id=order_id)
+    
+    if request.method == 'POST':
+        order_num = order.id
+        order.delete()
+        messages.success(request, f'Заказ #{order_num} удалён')
+        return redirect('orders')
+    
+    return render(request, 'nemo_park/delete_order.html', {'order': order})

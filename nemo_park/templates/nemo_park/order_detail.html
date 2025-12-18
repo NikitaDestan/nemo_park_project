@@ -1,0 +1,127 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Заказ #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="order-detail-page">
+    <div class="order-header">
+        <a href="{% url 'orders' %}" class="back-link">← Назад к заказам</a>
+        <h2 class="page-title">🧾 Заказ #{{ order.id }}</h2>
+    </div>
+    
+    <div class="order-card">
+        <!-- Статус -->
+        <div class="order-status-section">
+            <span class="status-badge status-{{ order.status }}">
+                {% if order.status == 'pending' %}⏳ В обработке
+                {% elif order.status == 'preparing' %}👨‍🍳 Готовится
+                {% elif order.status == 'ready' %}✅ Готов
+                {% elif order.status == 'delivered' %}📦 Выдан
+                {% elif order.status == 'cancelled' %}❌ Отменён
+                {% endif %}
+            </span>
+            
+            <form method="post" action="{% url 'update_order_status' order.id %}" class="status-form">
+                {% csrf_token %}
+                <select name="status" class="status-select">
+                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>⏳ В обработке</option>
+                    <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>👨‍🍳 Готовится</option>
+                    <option value="ready" {% if order.status == 'ready' %}selected{% endif %}>✅ Готов</option>
+                    <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>📦 Выдан</option>
+                    <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>❌ Отменён</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Обновить</button>
+            </form>
+        </div>
+        
+        <!-- Информация -->
+        <div class="order-info">
+            <div class="info-row">
+                <span class="info-label">👤 Посетитель</span>
+                <span class="info-value">
+                    {% if order.visitor %}
+                        {{ order.visitor.first_name }} {{ order.visitor.last_name }}
+                    {% else %}
+                        Без посетителя
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">💳 Кассир</span>
+                <span class="info-value">{{ order.cashier.username }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">📅 Дата</span>
+                <span class="info-value">{{ order.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+        </div>
+        
+        <!-- Товары -->
+        <div class="order-items">
+            <h3>🍕 Товары в заказе</h3>
+            {% for item in items %}
+            <div class="order-item">
+                <span class="item-emoji">{{ item.product.image_emoji }}</span>
+                <div class="item-info">
+                    <span class="item-name">{{ item.product.name }}</span>
+                    <span class="item-price">{{ item.price }} ₽ × {{ item.quantity }}</span>
+                </div>
+                <span class="item-total">{{ item.get_total }} ₽</span>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Итого -->
+        <div class="order-total">
+            <span>Итого:</span>
+            <span class="total-price">{{ order.total_price }} ₽</span>
+        </div>
+        
+        {% if order.notes %}
+        <div class="order-notes">
+            <h4>📝 Примечания</h4>
+            <p>{{ order.notes }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .order-detail-page { max-width: 700px; margin: 0 auto; }
+    .order-header { margin-bottom: 25px; }
+    .back-link { color: #0077B6; text-decoration: none; font-weight: 600; }
+    
+    .order-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+    
+    .order-status-section { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
+    .status-badge { padding: 10px 20px; border-radius: 25px; font-weight: 700; font-size: 1rem; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-preparing { background: #cce5ff; color: #004085; }
+    .status-ready { background: #d4edda; color: #155724; }
+    .status-delivered { background: #e8f8f5; color: #00b894; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    
+    .status-form { display: flex; gap: 10px; align-items: center; }
+    .status-select { padding: 8px 12px; border: 2px solid #e8e8e8; border-radius: 8px; }
+    .btn-sm { padding: 8px 16px; font-size: 0.9rem; }
+    
+    .order-info { margin-bottom: 25px; }
+    .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .info-label { color: #666; }
+    .info-value { font-weight: 600; }
+    
+    .order-items h3 { color: #023E8A; margin-bottom: 15px; }
+    .order-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #f8fafc; border-radius: 12px; margin-bottom: 10px; }
+    .item-emoji { font-size: 2rem; }
+    .item-info { flex: 1; }
+    .item-name { font-weight: 600; display: block; }
+    .item-price { font-size: 0.9rem; color: #666; }
+    .item-total { font-weight: 800; color: #00b894; font-size: 1.1rem; }
+    
+    .order-total { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: linear-gradient(135deg, #023E8A, #0077B6); border-radius: 12px; color: white; margin-top: 20px; }
+    .total-price { font-size: 1.8rem; font-weight: 800; }
+    
+    .order-notes { margin-top: 20px; padding: 15px; background: #fff8f0; border-radius: 12px; border: 2px solid #ffd9b3; }
+    .order-notes h4 { color: #FF6B35; margin-bottom: 10px; }
+</style>
+{% endblock %}

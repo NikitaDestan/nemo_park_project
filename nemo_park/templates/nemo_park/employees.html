@@ -3,67 +3,390 @@
 {% block title %}Сотрудники{% endblock %}
 
 {% block content %}
-<h2>👥 Список сотрудников</h2>
+<div class="page-header">
+    <h2 class="page-title">👥 Список сотрудников</h2>
+    {% if user.role == 'admin' %}
+    <a href="{% url 'add_employee' %}" class="btn btn-primary">
+        ➕ Добавить сотрудника
+    </a>
+    {% endif %}
+</div>
 
-<table>
-    <tr>
-        <th>Имя</th>
-        <th>Фамилия</th>
-        <th>Должность</th>
-        <th>Зарплата</th>
-        <th>Телефон</th>
-        <th>Email</th>
-        <th>Дата регистрации</th>
-        <th>Логин</th>
-        <th>Статус</th>
-        <th>Действия</th>
-    </tr>
-    {% for employee in employees %}
-    <tr>
-        <td>{{ employee.first_name }}</td>
-        <td>{{ employee.last_name }}</td>
-        <td>{{ employee.get_position_display }}</td>
-        <td>
-            {% if employee.position == 'user' %}
-                <span style="color: #999;">-</span>
-            {% else %}
-                {{ employee.salary }} руб.
-            {% endif %}
-        </td>
-        <td>{{ employee.phone|default:"-" }}</td>
-        <td>{{ employee.email|default:"-" }}</td>
-        <td>{{ employee.hire_date|date:"d.m.Y" }}</td>
-        <td>
-            {% if employee.customuser %}
-                {{ employee.customuser.username }}
-            {% else %}
-                <span style="color: #999;">Нет логина</span>
-            {% endif %}
-        </td>
-        <td>
-            {% if employee.position == 'user' %}
-                <span style="color: #ff6b00;">⏳ Ожидает</span>
-            {% else %}
-                <span style="color: #28a745;">✅ Активен</span>
-            {% endif %}
-        </td>
-        <td>
-            {% if user.role == 'admin' %}
-            <a href="{% url 'edit_employee' employee.id %}" style="color: #007cba; text-decoration: none;">✏️</a>
-            <a href="{% url 'delete_employee' employee.id %}" style="color: #dc3545; text-decoration: none; margin-left: 10px;">🗑️</a>
-            {% else %}
-            <span style="color: #999;">Только просмотр</span>
-            {% endif %}
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="10" style="text-align: center;">Нет сотрудников</td>
-    </tr>
-    {% endfor %}
-</table>
-<br>
-{% if user.role == 'admin' %}
-<a href="{% url 'add_employee' %}">➕ Добавить сотрудника</a>
-{% endif %}
+<!-- Статистика сотрудников -->
+<div class="mini-stats">
+    <div class="mini-stat">
+        <span class="mini-stat-number">{{ employees|length }}</span>
+        <span class="mini-stat-label">Всего</span>
+    </div>
+    <div class="mini-stat active">
+        <span class="mini-stat-number">{{ employees|length }}</span>
+        <span class="mini-stat-label">Активных</span>
+    </div>
+</div>
+
+<!-- Таблица сотрудников -->
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>👤 Сотрудник</th>
+                <th>💼 Должность</th>
+                <th>💰 Зарплата</th>
+                <th>📞 Контакты</th>
+                <th>📅 Дата приёма</th>
+                <th>🔑 Логин</th>
+                <th>📊 Статус</th>
+                <th>⚙️ Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employees %}
+            <tr>
+                <td>
+                    <div class="user-cell">
+                        <div class="user-avatar">
+                            {{ employee.first_name|slice:":1" }}{{ employee.last_name|slice:":1" }}
+                        </div>
+                        <div class="user-info-cell">
+                            <span class="user-name">{{ employee.first_name }} {{ employee.last_name }}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    {% if employee.position == 'admin' %}
+                        <span class="badge badge-admin">👑 Администратор</span>
+                    {% elif employee.position == 'cashier' %}
+                        <span class="badge badge-cashier">💳 Кассир</span>
+                    {% else %}
+                        <span class="badge badge-user">👤 Пользователь</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if employee.position == 'user' %}
+                        <span class="text-muted">—</span>
+                    {% else %}
+                        <span class="salary">{{ employee.salary }} ₽</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="contact-cell">
+                        {% if employee.phone %}
+                            <span class="contact-item">📱 {{ employee.phone }}</span>
+                        {% endif %}
+                        {% if employee.email %}
+                            <span class="contact-item">📧 {{ employee.email }}</span>
+                        {% endif %}
+                        {% if not employee.phone and not employee.email %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <span class="date">{{ employee.hire_date|date:"d.m.Y" }}</span>
+                </td>
+                <td>
+                    {% if employee.customuser %}
+                        <span class="login-badge">{{ employee.customuser.username }}</span>
+                    {% else %}
+                        <span class="text-muted">Нет логина</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if employee.position == 'user' %}
+                        <span class="status status-pending">
+                            <span class="status-dot pending"></span>
+                            Ожидает
+                        </span>
+                    {% else %}
+                        <span class="status status-active">
+                            <span class="status-dot active"></span>
+                            Активен
+                        </span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.role == 'admin' %}
+                    <div class="actions">
+                        <a href="{% url 'edit_employee' employee.id %}" class="action-btn edit-btn" title="Редактировать">
+                            ✏️
+                        </a>
+                        <a href="{% url 'delete_employee' employee.id %}" class="action-btn delete-btn" title="Удалить">
+                            🗑️
+                        </a>
+                    </div>
+                    {% else %}
+                        <span class="text-muted">Только просмотр</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">
+                    <div class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <h3>Нет сотрудников</h3>
+                        <p>Добавьте первого сотрудника в систему</p>
+                        {% if user.role == 'admin' %}
+                        <a href="{% url 'add_employee' %}" class="btn btn-primary">
+                            ➕ Добавить сотрудника
+                        </a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    /* Заголовок страницы */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .page-title {
+        margin: 0;
+    }
+
+    /* Мини-статистика */
+    .mini-stats {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .mini-stat {
+        background: #f8fafc;
+        padding: 15px 25px;
+        border-radius: 12px;
+        text-align: center;
+        border: 2px solid #e8e8e8;
+        transition: all 0.3s ease;
+    }
+
+    .mini-stat:hover {
+        border-color: #0077B6;
+        transform: translateY(-2px);
+    }
+
+    .mini-stat.active {
+        background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        border: none;
+        color: white;
+    }
+
+    .mini-stat-number {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #023E8A;
+    }
+
+    .mini-stat.active .mini-stat-number {
+        color: white;
+    }
+
+    .mini-stat-label {
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .mini-stat.active .mini-stat-label {
+        color: rgba(255,255,255,0.9);
+    }
+
+    /* Ячейка с пользователем */
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, #0077B6 0%, #023E8A 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .user-info-cell {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: 700;
+        color: #333;
+    }
+
+    /* Контакты */
+    .contact-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .contact-item {
+        font-size: 0.85rem;
+        color: #555;
+    }
+
+    /* Зарплата */
+    .salary {
+        font-weight: 700;
+        color: #00b894;
+    }
+
+    /* Дата */
+    .date {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    /* Логин */
+    .login-badge {
+        background: #f0f7ff;
+        color: #0077B6;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* Статус */
+    .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .status-dot.active {
+        background: #00b894;
+        box-shadow: 0 0 8px rgba(0, 184, 148, 0.5);
+    }
+
+    .status-dot.pending {
+        background: #f39c12;
+        box-shadow: 0 0 8px rgba(243, 156, 18, 0.5);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .status-active {
+        color: #00b894;
+    }
+
+    .status-pending {
+        color: #f39c12;
+    }
+
+    /* Текст-заглушка */
+    .text-muted {
+        color: #aaa;
+    }
+
+    /* Кнопки действий */
+    .actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn.edit-btn {
+        background: #f0f7ff;
+    }
+
+    .action-btn.edit-btn:hover {
+        background: #0077B6;
+        transform: scale(1.1);
+    }
+
+    .action-btn.delete-btn {
+        background: #fff5f5;
+    }
+
+    .action-btn.delete-btn:hover {
+        background: #e74c3c;
+        transform: scale(1.1);
+    }
+
+    /* Пустое состояние */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 1024px) {
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 900px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .mini-stats {
+            flex-wrap: wrap;
+        }
+    }
+</style>
 {% endblock %}

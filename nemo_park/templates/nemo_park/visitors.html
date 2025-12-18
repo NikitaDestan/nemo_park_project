@@ -3,41 +3,346 @@
 {% block title %}Посетители{% endblock %}
 
 {% block content %}
-<h2>👤 Список посетителей</h2>
+<div class="page-header">
+    <h2 class="page-title">👤 Список посетителей</h2>
+    {% if user.role == 'admin' %}
+    <a href="{% url 'add_visitor' %}" class="btn btn-primary">
+        ➕ Добавить посетителя
+    </a>
+    {% endif %}
+</div>
 
-<table>
-    <tr>
-        <th>Имя</th>
-        <th>Фамилия</th>
-        <th>Email</th>
-        <th>Телефон</th>
-        <th>Дата регистрации</th>
-        <th>Действия</th>
-    </tr>
-    {% for visitor in visitors %}
-    <tr>
-        <td>{{ visitor.first_name }}</td>
-        <td>{{ visitor.last_name }}</td>
-        <td>{{ visitor.email }}</td>
-        <td>{{ visitor.phone }}</td>
-        <td>{{ visitor.registration_date|date:"d.m.Y H:i" }}</td>
-        <td>
-            {% if user.role == 'admin' %}
-            <a href="{% url 'edit_visitor' visitor.id %}" style="color: #007cba; text-decoration: none;">✏️</a>
-            <a href="{% url 'delete_visitor' visitor.id %}" style="color: #dc3545; text-decoration: none; margin-left: 10px;">🗑️</a>
-            {% else %}
-            <span style="color: #999;">Только просмотр</span>
-            {% endif %}
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="6" style="text-align: center;">Нет посетителей</td>
-    </tr>
-    {% endfor %}
-</table>
-<br>
-{% if user.role == 'admin' %}
-<a href="{% url 'add_visitor' %}">➕ Добавить посетителя</a>
-{% endif %}
+<!-- Статистика посетителей -->
+<div class="mini-stats">
+    <div class="mini-stat">
+        <span class="mini-stat-icon">👥</span>
+        <span class="mini-stat-number">{{ visitors|length }}</span>
+        <span class="mini-stat-label">Всего гостей</span>
+    </div>
+    <div class="mini-stat today">
+        <span class="mini-stat-icon">🎢</span>
+        <span class="mini-stat-number">{{ visitors|length }}</span>
+        <span class="mini-stat-label">Зарегистрировано</span>
+    </div>
+</div>
+
+<!-- Таблица посетителей -->
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>👤 Посетитель</th>
+                <th>📧 Email</th>
+                <th>📱 Телефон</th>
+                <th>📅 Дата регистрации</th>
+                <th>⚙️ Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for visitor in visitors %}
+            <tr>
+                <td>
+                    <div class="user-cell">
+                        <div class="user-avatar visitor-avatar">
+                            {{ visitor.first_name|slice:":1" }}{{ visitor.last_name|slice:":1" }}
+                        </div>
+                        <div class="user-info-cell">
+                            <span class="user-name">{{ visitor.first_name }} {{ visitor.last_name }}</span>
+                            <span class="user-id">#{{ visitor.id }}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <a href="mailto:{{ visitor.email }}" class="email-link">
+                        📧 {{ visitor.email }}
+                    </a>
+                </td>
+                <td>
+                    <a href="tel:{{ visitor.phone }}" class="phone-link">
+                        📱 {{ visitor.phone }}
+                    </a>
+                </td>
+                <td>
+                    <div class="date-cell">
+                        <span class="date-main">{{ visitor.registration_date|date:"d.m.Y" }}</span>
+                        <span class="date-time">{{ visitor.registration_date|date:"H:i" }}</span>
+                    </div>
+                </td>
+                <td>
+                    {% if user.role == 'admin' %}
+                    <div class="actions">
+                        <a href="{% url 'edit_visitor' visitor.id %}" class="action-btn edit-btn" title="Редактировать">
+                            ✏️
+                        </a>
+                        <a href="{% url 'delete_visitor' visitor.id %}" class="action-btn delete-btn" title="Удалить">
+                            🗑️
+                        </a>
+                    </div>
+                    {% else %}
+                        <span class="text-muted">Только просмотр</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">
+                        <div class="empty-icon">🐠</div>
+                        <h3>Пока нет посетителей</h3>
+                        <p>Зарегистрируйте первого гостя парка «Немо»</p>
+                        {% if user.role == 'admin' %}
+                        <a href="{% url 'add_visitor' %}" class="btn btn-primary">
+                            ➕ Добавить посетителя
+                        </a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    /* Заголовок страницы */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .page-title {
+        margin: 0;
+    }
+
+    /* Мини-статистика */
+    .mini-stats {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+
+    .mini-stat {
+        background: #f8fafc;
+        padding: 18px 28px;
+        border-radius: 16px;
+        text-align: center;
+        border: 2px solid #e8e8e8;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .mini-stat:hover {
+        border-color: #0077B6;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 119, 182, 0.15);
+    }
+
+    .mini-stat.today {
+        background: linear-gradient(135deg, #FF6B35 0%, #f7931e 100%);
+        border: none;
+        color: white;
+    }
+
+    .mini-stat-icon {
+        font-size: 1.8rem;
+    }
+
+    .mini-stat-number {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #023E8A;
+    }
+
+    .mini-stat.today .mini-stat-number {
+        color: white;
+    }
+
+    .mini-stat-label {
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .mini-stat.today .mini-stat-label {
+        color: rgba(255,255,255,0.9);
+    }
+
+    /* Ячейка с посетителем */
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #0077B6 0%, #023E8A 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+
+    .visitor-avatar {
+        background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+    }
+
+    .user-info-cell {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: 700;
+        color: #333;
+        font-size: 0.95rem;
+    }
+
+    .user-id {
+        font-size: 0.8rem;
+        color: #999;
+    }
+
+    /* Email и телефон */
+    .email-link, .phone-link {
+        color: #0077B6;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .email-link:hover, .phone-link:hover {
+        color: #FF6B35;
+        transform: translateX(3px);
+    }
+
+    /* Дата */
+    .date-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .date-main {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .date-time {
+        font-size: 0.8rem;
+        color: #999;
+    }
+
+    /* Текст-заглушка */
+    .text-muted {
+        color: #aaa;
+        font-size: 0.85rem;
+    }
+
+    /* Кнопки действий */
+    .actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn.edit-btn {
+        background: #f0f7ff;
+    }
+
+    .action-btn.edit-btn:hover {
+        background: #0077B6;
+        transform: scale(1.15);
+        box-shadow: 0 5px 15px rgba(0, 119, 182, 0.3);
+    }
+
+    .action-btn.delete-btn {
+        background: #fff5f5;
+    }
+
+    .action-btn.delete-btn:hover {
+        background: #e74c3c;
+        transform: scale(1.15);
+        box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+    }
+
+    /* Пустое состояние */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        animation: swim 3s ease-in-out infinite;
+    }
+
+    @keyframes swim {
+        0%, 100% { transform: translateX(0) rotate(0deg); }
+        25% { transform: translateX(10px) rotate(5deg); }
+        75% { transform: translateX(-10px) rotate(-5deg); }
+    }
+
+    .empty-state h3 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 1.3rem;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 900px) {
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 700px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .mini-stats {
+            width: 100%;
+        }
+
+        .mini-stat {
+            flex: 1;
+            min-width: 140px;
+        }
+    }
+</style>
 {% endblock %}

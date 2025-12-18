@@ -1,0 +1,331 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Меню{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">🍕 Меню парка «Немо»</h2>
+    {% if user.role == 'admin' %}
+    <a href="{% url 'add_product' %}" class="btn btn-success">
+        ➕ Добавить товар
+    </a>
+    {% endif %}
+</div>
+
+<!-- Статистика -->
+<div class="mini-stats">
+    <div class="mini-stat">
+        <span class="mini-stat-icon">🍽️</span>
+        <span class="mini-stat-number">{{ total_products }}</span>
+        <span class="mini-stat-label">Всего товаров</span>
+    </div>
+    <div class="mini-stat available">
+        <span class="mini-stat-icon">✅</span>
+        <span class="mini-stat-number">{{ available_products }}</span>
+        <span class="mini-stat-label">В наличии</span>
+    </div>
+</div>
+
+<!-- Товары по категориям -->
+{% for category_name, category_products in categories.items %}
+<div class="category-section">
+    <h3 class="category-title">{{ category_name }}</h3>
+    <div class="products-grid">
+        {% for product in category_products %}
+        <div class="product-card {% if not product.is_available %}unavailable{% endif %} {% if product.is_popular %}popular{% endif %}">
+            {% if product.is_popular %}
+            <div class="popular-badge">🔥 Хит</div>
+            {% endif %}
+            
+            <div class="product-emoji">{{ product.image_emoji }}</div>
+            <div class="product-info">
+                <h4 class="product-name">{{ product.name }}</h4>
+                <p class="product-description">{{ product.description }}</p>
+                <div class="product-price">{{ product.price }} ₽</div>
+            </div>
+            
+            <div class="product-status">
+                {% if product.is_available %}
+                    <span class="status-badge available">✅ В наличии</span>
+                {% else %}
+                    <span class="status-badge unavailable">❌ Нет в наличии</span>
+                {% endif %}
+            </div>
+            
+            {% if user.role == 'admin' %}
+            <div class="product-actions">
+                <a href="{% url 'edit_product' product.id %}" class="action-btn edit-btn" title="Редактировать">✏️</a>
+                <a href="{% url 'delete_product' product.id %}" class="action-btn delete-btn" title="Удалить">🗑️</a>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% empty %}
+<div class="empty-state">
+    <div class="empty-icon">🍕</div>
+    <h3>Меню пока пустое</h3>
+    <p>Добавьте первый товар</p>
+    {% if user.role == 'admin' %}
+    <a href="{% url 'add_product' %}" class="btn btn-success">➕ Добавить товар</a>
+    {% endif %}
+</div>
+{% endfor %}
+
+<style>
+    /* Заголовок страницы */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    /* Мини-статистика */
+    .mini-stats {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .mini-stat {
+        background: #f8fafc;
+        padding: 18px 28px;
+        border-radius: 16px;
+        text-align: center;
+        border: 2px solid #e8e8e8;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s ease;
+    }
+
+    .mini-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .mini-stat.available {
+        background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        border: none;
+        color: white;
+    }
+
+    .mini-stat-icon {
+        font-size: 1.8rem;
+    }
+
+    .mini-stat-number {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #023E8A;
+    }
+
+    .mini-stat.available .mini-stat-number {
+        color: white;
+    }
+
+    .mini-stat-label {
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .mini-stat.available .mini-stat-label {
+        color: rgba(255,255,255,0.9);
+    }
+
+    /* Секция категории */
+    .category-section {
+        margin-bottom: 40px;
+    }
+
+    .category-title {
+        font-size: 1.4rem;
+        color: #023E8A;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #FF6B35;
+        display: inline-block;
+    }
+
+    /* Сетка товаров */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    /* Карточка товара */
+    .product-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.2s ease;
+        position: relative;
+        border: 2px solid transparent;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        border-color: #0077B6;
+    }
+
+    .product-card.unavailable {
+        opacity: 0.6;
+        background: #f5f5f5;
+    }
+
+    .product-card.popular {
+        border-color: #FF6B35;
+    }
+
+    /* Бейдж популярного */
+    .popular-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: linear-gradient(135deg, #FF6B35 0%, #f7931e 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    /* Эмодзи товара */
+    .product-emoji {
+        font-size: 3.5rem;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    /* Информация о товаре */
+    .product-info {
+        text-align: center;
+    }
+
+    .product-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #333;
+        margin: 0 0 8px 0;
+    }
+
+    .product-description {
+        font-size: 0.85rem;
+        color: #666;
+        margin: 0 0 15px 0;
+        line-height: 1.4;
+    }
+
+    .product-price {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #00b894;
+    }
+
+    /* Статус товара */
+    .product-status {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-badge.available {
+        background: #e8f8f5;
+        color: #00b894;
+    }
+
+    .status-badge.unavailable {
+        background: #fdf2f2;
+        color: #e74c3c;
+    }
+
+    /* Действия с товаром */
+    .product-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+
+    .action-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: all 0.2s ease;
+    }
+
+    .action-btn.edit-btn {
+        background: #f0f7ff;
+    }
+
+    .action-btn.edit-btn:hover {
+        background: #0077B6;
+        transform: scale(1.1);
+    }
+
+    .action-btn.delete-btn {
+        background: #fff5f5;
+    }
+
+    .action-btn.delete-btn:hover {
+        background: #e74c3c;
+        transform: scale(1.1);
+    }
+
+    /* Пустое состояние */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+    }
+
+    .empty-state h3 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .products-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,18 +1,373 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     {% load static %}
-    <title>Регистрация - Аквапарк</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - Парк Немо</title>
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <link rel="manifest" href="{% static 'site.webmanifest' %}">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Анимированные пузырьки */
+        .bubbles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            animation: rise 10s infinite ease-in;
+        }
+
+        .bubble:nth-child(1) { width: 40px; height: 40px; left: 10%; animation-duration: 8s; }
+        .bubble:nth-child(2) { width: 20px; height: 20px; left: 20%; animation-duration: 5s; animation-delay: 1s; }
+        .bubble:nth-child(3) { width: 50px; height: 50px; left: 35%; animation-duration: 7s; animation-delay: 2s; }
+        .bubble:nth-child(4) { width: 80px; height: 80px; left: 50%; animation-duration: 11s; animation-delay: 0s; }
+        .bubble:nth-child(5) { width: 35px; height: 35px; left: 55%; animation-duration: 6s; animation-delay: 1s; }
+        .bubble:nth-child(6) { width: 45px; height: 45px; left: 65%; animation-duration: 8s; animation-delay: 3s; }
+        .bubble:nth-child(7) { width: 25px; height: 25px; left: 70%; animation-duration: 12s; animation-delay: 2s; }
+        .bubble:nth-child(8) { width: 60px; height: 60px; left: 80%; animation-duration: 7s; animation-delay: 5s; }
+        .bubble:nth-child(9) { width: 30px; height: 30px; left: 90%; animation-duration: 9s; animation-delay: 1s; }
+        .bubble:nth-child(10) { width: 55px; height: 55px; left: 5%; animation-duration: 10s; animation-delay: 4s; }
+
+        @keyframes rise {
+            0% {
+                bottom: -100px;
+                transform: translateX(0) scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 0.3;
+            }
+            100% {
+                bottom: 110%;
+                transform: translateX(-50px) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* Контейнер регистрации */
+        .register-container {
+            position: relative;
+            z-index: 1;
+            background: white;
+            padding: 40px 40px;
+            border-radius: 24px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 480px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Логотип */
+        .register-logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .register-logo .fish-icon {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: 10px;
+            animation: swim 3s ease-in-out infinite;
+        }
+
+        @keyframes swim {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(10px) rotate(5deg); }
+            75% { transform: translateX(-10px) rotate(-5deg); }
+        }
+
+        .register-logo h1 {
+            color: #023E8A;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .register-logo p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* Сообщения */
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .error, .alert-error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .error::before, .alert-error::before {
+            content: '❌';
+        }
+
+        .success, .alert-success {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .success::before, .alert-success::before {
+            content: '✅';
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        /* Форма */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 700;
+            color: #023E8A;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Nunito', sans-serif;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0077B6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #aaa;
+        }
+
+        /* Ошибки полей */
+        .form-group ul {
+            list-style: none;
+            padding: 0;
+            margin: 6px 0 0 0;
+        }
+
+        .form-group ul li {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            padding: 4px 0;
+        }
+
+        .form-group .errorlist {
+            background: #fff5f5;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-top: 6px;
+        }
+
+        .form-group .errorlist li {
+            color: #c0392b;
+            font-size: 0.8rem;
+        }
+
+        /* Подсказка для телефона */
+        .phone-hint {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Кнопка регистрации */
+        button[type="submit"] {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #FF6B35 0%, #f7931e 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(255, 107, 53, 0.4);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(-1px);
+        }
+
+        button[type="submit"]::before {
+            content: '🎢 ';
+        }
+
+        /* Ссылка на вход */
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .login-link p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .login-link a {
+            color: #0077B6;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: #FF6B35;
+            text-decoration: underline;
+        }
+
+        /* Декоративная волна */
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.1) 100%);
+            border-radius: 0 0 24px 24px;
+            pointer-events: none;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 520px) {
+            .register-container {
+                padding: 30px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .register-logo .fish-icon {
+                font-size: 2.8rem;
+            }
+
+            .register-logo h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
 </head>
-<body  style="padding: 20px; background: linear-gradient(45deg,rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+<body>
+    <!-- Анимированные пузырьки -->
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
     <div class="register-container">
-        <h2 style="text-align: center; color: #007cba;">🏊 Регистрация</h2>
+        <div class="wave"></div>
+
+        <!-- Логотип -->
+        <div class="register-logo">
+            <span class="fish-icon">🐠</span>
+            <h1>Добро пожаловать в «Немо»!</h1>
+            <p>Создайте аккаунт для работы в системе</p>
+        </div>
         
+        <!-- Сообщения -->
+        {% if messages %}
         <div class="messages">
             {% for message in messages %}
                 <div class="{% if message.tags == 'error' %}error{% else %}success{% endif %}">
@@ -20,58 +375,202 @@
                 </div>
             {% endfor %}
         </div>
+        {% endif %}
         
-<form method="post">
-    {% csrf_token %}
-    
-    <div class="form-group">
-        <label for="id_username">Логин:</label>
-        {{ form.username }}
-        {{ form.username.errors }}
-    </div>
-    
-    <div class="form-group">
-        <label for="id_email">Email:</label>
-        {{ form.email }}
-        {{ form.email.errors }}
-    </div>
-    
-    <div class="form-group">
-        <label for="id_first_name">Имя:</label>
-        {{ form.first_name }}
-        {{ form.first_name.errors }}
-    </div>
-    
-    <div class="form-group">
-        <label for="id_last_name">Фамилия:</label>
-        {{ form.last_name }}
-        {{ form.last_name.errors }}
-    </div>
-    
-    <div class="form-group">
-        <label for="id_phone">Телефон:</label>
-        {{ form.phone }}
-        {{ form.phone.errors }}
-    </div>
-    
-    <div class="form-group">
-        <label for="id_password1">Пароль:</label>
-        {{ form.password1 }}
-        {{ form.password1.errors }}
-    </div>
-    
-    <div class="form-group">
-        <label for="id_password2">Подтверждение пароля:</label>
-        {{ form.password2 }}
-        {{ form.password2.errors }}
-    </div>
-    
-    <button type="submit">Зарегистрироваться</button>
-</form>
+        <!-- Форма регистрации -->
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_first_name">👤 Имя</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.first_name.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_last_name">👤 Фамилия</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.last_name.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_username">🎫 Логин</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.username.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_email">📧 Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.email.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_phone">📱 Телефон</label>
+                    {{ form.phone }}
+                    <div class="phone-hint">Формат: +7 (999) 123-45-67</div>
+                    {% if form.phone.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.phone.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_password1">🔒 Пароль</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.password1.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password2">🔒 Подтверждение</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.password2.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <button type="submit">Зарегистрироваться</button>
+        </form>
         
+        <!-- Ссылка на вход -->
         <div class="login-link">
-            <p>Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+            <p>Уже есть аккаунт? <a href="{% url 'login' %}">Войти 🔑</a></p>
         </div>
     </div>
+
+    <!-- Маска для телефона и валидация -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // ==================== МАСКА ТЕЛЕФОНА ====================
+        const phoneInput = document.querySelector('input[name="phone"]');
+        
+        if (phoneInput) {
+            phoneInput.placeholder = '+7 (___) ___-__-__';
+            
+            phoneInput.addEventListener('focus', function(e) {
+                if (!e.target.value) {
+                    e.target.value = '+7 (';
+                }
+            });
+            
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                
+                if (value.startsWith('8')) {
+                    value = '7' + value.slice(1);
+                }
+                
+                if (!value.startsWith('7') && value.length > 0) {
+                    value = '7' + value;
+                }
+                
+                value = value.slice(0, 11);
+                
+                let formatted = '';
+                if (value.length > 0) {
+                    formatted = '+7';
+                }
+                if (value.length > 1) {
+                    formatted += ' (' + value.slice(1, 4);
+                }
+                if (value.length >= 4) {
+                    formatted += ') ';
+                }
+                if (value.length > 4) {
+                    formatted += value.slice(4, 7);
+                }
+                if (value.length > 7) {
+                    formatted += '-' + value.slice(7, 9);
+                }
+                if (value.length > 9) {
+                    formatted += '-' + value.slice(9, 11);
+                }
+                
+                e.target.value = formatted;
+            });
+            
+            phoneInput.addEventListener('keydown', function(e) {
+                const cursorPos = e.target.selectionStart;
+                if (cursorPos <= 4 && (e.key === 'Backspace' || e.key === 'Delete')) {
+                    e.preventDefault();
+                }
+            });
+            
+            phoneInput.addEventListener('blur', function(e) {
+                if (e.target.value === '+7 (' || e.target.value === '+7' || e.target.value === '+7 () ') {
+                    e.target.value = '';
+                }
+            });
+        }
+        
+        // ==================== ВАЛИДАЦИЯ ИМЕНИ/ФАМИЛИИ ====================
+        const nameInputs = document.querySelectorAll('input[name="first_name"], input[name="last_name"]');
+        
+        nameInputs.forEach(function(input) {
+            input.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/[^а-яА-ЯёЁa-zA-Z\s\-]/g, '');
+            });
+            
+            input.addEventListener('keypress', function(e) {
+                if (!/[а-яА-ЯёЁa-zA-Z\s\-]/.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
+            
+            input.addEventListener('blur', function(e) {
+                if (e.target.value) {
+                    e.target.value = e.target.value
+                        .split(' ')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                        .join(' ');
+                }
+            });
+        });
+    });
+    </script>
 </body>
 </html>

@@ -3,28 +3,299 @@
 {% block title %}Удалить посетителя{% endblock %}
 
 {% block content %}
-<div style="max-width: 500px; margin: 0 auto;">
-    <h2>🗑️ Удалить посетителя</h2>
+<div class="delete-page">
+    <!-- Заголовок -->
+    <div class="delete-header">
+        <a href="{% url 'visitors' %}" class="back-link">
+            ← Назад к посетителям
+        </a>
+    </div>
     
-    <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px;">
-        <h3 style="color: #c62828;">⚠️ Внимание!</h3>
-        <p>Вы собираетесь удалить посетителя: <strong>{{ visitor.first_name }} {{ visitor.last_name }}</strong></p>
+    <!-- Карточка удаления -->
+    <div class="delete-card">
+        <!-- Иконка предупреждения -->
+        <div class="delete-icon">
+            <span>⚠️</span>
+        </div>
         
-        <p><strong>Также будут удалены все билеты этого посетителя!</strong></p>
+        <h2 class="delete-title">Удаление посетителя</h2>
         
-        <p style="color: #c62828;">Это действие нельзя отменить!</p>
+        <!-- Информация о посетителе -->
+        <div class="visitor-to-delete">
+            <div class="visitor-avatar">
+                {{ visitor.first_name|slice:":1" }}{{ visitor.last_name|slice:":1" }}
+            </div>
+            <div class="visitor-details">
+                <span class="visitor-name">{{ visitor.first_name }} {{ visitor.last_name }}</span>
+                <span class="visitor-info">🎫 Гость парка «Немо»</span>
+            </div>
+        </div>
         
+        <!-- Предупреждения -->
+        <div class="warning-box">
+            <div class="warning-item">
+                <span class="warning-icon">👤</span>
+                <span>Посетитель <strong>{{ visitor.first_name }} {{ visitor.last_name }}</strong> будет удалён</span>
+            </div>
+            
+            <div class="warning-item">
+                <span class="warning-icon">🎫</span>
+                <span><strong>Все билеты</strong> этого посетителя будут удалены</span>
+            </div>
+            
+            <div class="warning-item critical">
+                <span class="warning-icon">❌</span>
+                <span>Это действие <strong>нельзя отменить!</strong></span>
+            </div>
+        </div>
+        
+        <!-- Кнопки -->
         <form method="post">
             {% csrf_token %}
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="submit" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            <div class="delete-actions">
+                <button type="submit" class="btn btn-danger">
                     🗑️ Удалить навсегда
                 </button>
-                <a href="{% url 'visitors' %}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
+                <a href="{% url 'visitors' %}" class="btn btn-secondary">
                     ↩️ Отмена
                 </a>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    /* Страница удаления */
+    .delete-page {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    /* Заголовок */
+    .delete-header {
+        margin-bottom: 20px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #0077B6;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+        color: #FF6B35;
+        transform: translateX(-5px);
+    }
+
+    /* Карточка удаления */
+    .delete-card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        border: 3px solid #fee2e2;
+    }
+
+    .delete-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #e74c3c, #c0392b, #e74c3c);
+        background-size: 200% 100%;
+        animation: danger-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes danger-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+
+    /* Иконка предупреждения */
+    .delete-icon {
+        margin-bottom: 20px;
+    }
+
+    .delete-icon span {
+        font-size: 4rem;
+        display: inline-block;
+        animation: shake 0.5s ease-in-out infinite;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-10deg); }
+        75% { transform: rotate(10deg); }
+    }
+
+    /* Заголовок */
+    .delete-title {
+        color: #c0392b;
+        font-size: 1.5rem;
+        margin: 0 0 25px 0;
+    }
+
+    /* Информация о посетителе */
+    .visitor-to-delete {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 25px;
+    }
+
+    .visitor-avatar {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 800;
+        font-size: 1.3rem;
+    }
+
+    .visitor-details {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+        gap: 4px;
+    }
+
+    .visitor-name {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+    .visitor-info {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    /* Предупреждения */
+    .warning-box {
+        background: #fff5f5;
+        border: 2px solid #feb2b2;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 25px;
+        text-align: left;
+    }
+
+    .warning-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #fed7d7;
+        font-size: 0.95rem;
+        color: #444;
+    }
+
+    .warning-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .warning-item:first-child {
+        padding-top: 0;
+    }
+
+    .warning-item.critical {
+        color: #c0392b;
+        font-weight: 600;
+    }
+
+    .warning-icon {
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .warning-item strong {
+        color: #c0392b;
+    }
+
+    /* Кнопки */
+    .delete-actions {
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 16px 24px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: none;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(231, 76, 60, 0.4);
+    }
+
+    .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #e0e0e0;
+        transform: translateY(-2px);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 500px) {
+        .delete-card {
+            padding: 30px 20px;
+        }
+
+        .delete-actions {
+            flex-direction: column;
+        }
+
+        .visitor-to-delete {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .visitor-details {
+            text-align: center;
+        }
+
+        .delete-icon span {
+            font-size: 3rem;
+        }
+    }
+</style>
 {% endblock %}

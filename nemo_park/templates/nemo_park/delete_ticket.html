@@ -3,32 +3,360 @@
 {% block title %}Удалить билет{% endblock %}
 
 {% block content %}
-<div style="max-width: 500px; margin: 0 auto;">
-    <h2>🗑️ Удалить билет</h2>
+<div class="delete-page">
+    <!-- Заголовок -->
+    <div class="delete-header">
+        <a href="{% url 'tickets' %}" class="back-link">
+            ← Назад к билетам
+        </a>
+    </div>
     
-    <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px;">
-        <h3 style="color: #c62828;">⚠️ Внимание!</h3>
-        <p>Вы собираетесь удалить билет:</p>
-        <ul>
-            <li><strong>Посетитель:</strong> {{ ticket.visitor.first_name }} {{ ticket.visitor.last_name }}</li>
-            <li><strong>Тип билета:</strong> {{ ticket.get_ticket_type_display }}</li>
-            <li><strong>Цена:</strong> {{ ticket.price }} руб.</li>
-            <li><strong>Дата покупки:</strong> {{ ticket.purchase_date|date:"d.m.Y H:i" }}</li>
-        </ul>
+    <!-- Карточка удаления -->
+    <div class="delete-card">
+        <!-- Иконка предупреждения -->
+        <div class="delete-icon">
+            <span>⚠️</span>
+        </div>
         
-        <p style="color: #c62828;">Это действие нельзя отменить!</p>
+        <h2 class="delete-title">Удаление билета</h2>
         
+        <!-- Информация о билете -->
+        <div class="ticket-to-delete">
+            <div class="ticket-badge-icon">
+                {% if ticket.ticket_type == 'vip' %}👑
+                {% elif ticket.ticket_type == 'family' %}👨‍👩‍👧
+                {% elif ticket.ticket_type == 'child' %}🧒
+                {% elif ticket.ticket_type == 'water' %}🌊
+                {% elif ticket.ticket_type == 'extreme' %}🎢
+                {% else %}🎫
+                {% endif %}
+            </div>
+            <div class="ticket-details">
+                <span class="ticket-type-name">{{ ticket.get_ticket_type_display }}</span>
+                <span class="ticket-price">{{ ticket.price }} ₽</span>
+            </div>
+        </div>
+        
+        <!-- Детали билета -->
+        <div class="ticket-info-box">
+            <div class="info-row">
+                <span class="info-label">👤 Посетитель</span>
+                <span class="info-value">{{ ticket.visitor.first_name }} {{ ticket.visitor.last_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">🎟️ Тип билета</span>
+                <span class="info-value">{{ ticket.get_ticket_type_display }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">💰 Цена</span>
+                <span class="info-value price">{{ ticket.price }} ₽</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">📅 Дата покупки</span>
+                <span class="info-value">{{ ticket.purchase_date|date:"d.m.Y в H:i" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">⏰ Действителен до</span>
+                <span class="info-value">{{ ticket.valid_date|date:"d.m.Y" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">💳 Кассир</span>
+                <span class="info-value">{{ ticket.cashier.username }}</span>
+            </div>
+        </div>
+        
+        <!-- Предупреждение -->
+        <div class="warning-box">
+            <div class="warning-item critical">
+                <span class="warning-icon">❌</span>
+                <span>Это действие <strong>нельзя отменить!</strong></span>
+            </div>
+        </div>
+        
+        <!-- Кнопки -->
         <form method="post">
             {% csrf_token %}
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="submit" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    🗑️ Удалить навсегда
+            <div class="delete-actions">
+                <button type="submit" class="btn btn-danger">
+                    🗑️ Удалить билет
                 </button>
-                <a href="{% url 'tickets' %}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
+                <a href="{% url 'tickets' %}" class="btn btn-secondary">
                     ↩️ Отмена
                 </a>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    /* Страница удаления */
+    .delete-page {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    /* Заголовок */
+    .delete-header {
+        margin-bottom: 20px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #0077B6;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+        color: #FF6B35;
+        transform: translateX(-5px);
+    }
+
+    /* Карточка удаления */
+    .delete-card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        border: 3px solid #fee2e2;
+    }
+
+    .delete-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #e74c3c, #c0392b, #e74c3c);
+        background-size: 200% 100%;
+        animation: danger-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes danger-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+
+    /* Иконка предупреждения */
+    .delete-icon {
+        margin-bottom: 20px;
+    }
+
+    .delete-icon span {
+        font-size: 4rem;
+        display: inline-block;
+        animation: shake 0.5s ease-in-out infinite;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-10deg); }
+        75% { transform: rotate(10deg); }
+    }
+
+    /* Заголовок */
+    .delete-title {
+        color: #c0392b;
+        font-size: 1.5rem;
+        margin: 0 0 25px 0;
+    }
+
+    /* Информация о билете */
+    .ticket-to-delete {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        border: 2px solid #feb2b2;
+    }
+
+    .ticket-badge-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+
+    .ticket-details {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+        gap: 4px;
+    }
+
+    .ticket-type-name {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+    .ticket-price {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #c0392b;
+    }
+
+    /* Детали билета */
+    .ticket-info-box {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #e8e8e8;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .info-row:first-child {
+        padding-top: 0;
+    }
+
+    .info-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+    }
+
+    .info-value.price {
+        color: #00b894;
+        font-weight: 800;
+    }
+
+    /* Предупреждения */
+    .warning-box {
+        background: #fff5f5;
+        border: 2px solid #feb2b2;
+        border-radius: 16px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        text-align: left;
+    }
+
+    .warning-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.95rem;
+        color: #444;
+    }
+
+    .warning-item.critical {
+        color: #c0392b;
+        font-weight: 600;
+    }
+
+    .warning-icon {
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .warning-item strong {
+        color: #c0392b;
+    }
+
+    /* Кнопки */
+    .delete-actions {
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 16px 24px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: none;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(231, 76, 60, 0.4);
+    }
+
+    .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #e0e0e0;
+        transform: translateY(-2px);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 500px) {
+        .delete-card {
+            padding: 30px 20px;
+        }
+
+        .delete-actions {
+            flex-direction: column;
+        }
+
+        .ticket-to-delete {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .ticket-details {
+            text-align: center;
+        }
+
+        .delete-icon span {
+            font-size: 3rem;
+        }
+
+        .info-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+    }
+</style>
 {% endblock %}

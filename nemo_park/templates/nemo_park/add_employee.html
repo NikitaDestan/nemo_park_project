@@ -3,57 +3,389 @@
 {% block title %}Добавить сотрудника{% endblock %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 0 auto;">
-    <h2>👥 Добавить сотрудника</h2>
+<div class="form-page">
+    <!-- Заголовок -->
+    <div class="form-header">
+        <a href="{% url 'employees' %}" class="back-link">
+            ← Назад к списку
+        </a>
+        <h2 class="page-title">👥 Добавить сотрудника</h2>
+        <p class="page-subtitle">Заполните данные нового члена команды «Немо»</p>
+    </div>
     
-    <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+    <!-- Форма -->
+    <div class="form-card">
         <form method="post">
             {% csrf_token %}
             
-            <h3>📝 Данные сотрудника</h3>
-            {% for field in form %}
-                {% if field.name != 'username' and field.name != 'password' %}
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                    <div style="color: red; font-size: 14px; margin-top: 5px;">
-                        {{ field.errors }}
-                    </div>
-                    {% endif %}
+            <!-- Секция: Личные данные -->
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="section-icon">📝</span>
+                    <h3>Личные данные</h3>
                 </div>
-                {% endif %}
-            {% endfor %}
-            
-            <h3>🔐 Данные для входа</h3>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.username.label }}</label>
-                {{ form.username }}
+                
+                <div class="form-grid">
+                    {% for field in form %}
+                        {% if field.name != 'username' and field.name != 'password' %}
+                        <div class="form-group {% if field.name == 'email' or field.name == 'phone' %}half-width{% endif %}">
+                            <label for="{{ field.id_for_label }}">
+                                {% if field.name == 'first_name' %}👤{% endif %}
+                                {% if field.name == 'last_name' %}👤{% endif %}
+                                {% if field.name == 'position' %}💼{% endif %}
+                                {% if field.name == 'salary' %}💰{% endif %}
+                                {% if field.name == 'phone' %}📱{% endif %}
+                                {% if field.name == 'email' %}📧{% endif %}
+                                {% if field.name == 'hire_date' %}📅{% endif %}
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                            <div class="field-error">
+                                {% for error in field.errors %}
+                                    <span>❌ {{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.password.label }}</label>
-                {{ form.password }}
+            
+            <!-- Секция: Данные для входа -->
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="section-icon">🔐</span>
+                    <h3>Данные для входа в систему</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}">🎫 {{ form.username.label }}</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                        <div class="field-error">
+                            {% for error in form.username.errors %}
+                                <span>❌ {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.password.id_for_label }}">🔒 {{ form.password.label }}</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}
+                        <div class="field-error">
+                            {% for error in form.password.errors %}
+                                <span>❌ {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
             
-            <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <h4>💡 Примечание:</h4>
-                <p>При выборе должности автоматически устанавливается соответствующая роль в системе:</p>
-                <ul style="margin: 0;">
-                    <li><strong>Пользователь</strong> - ожидает назначения роли</li>
-                    <li><strong>Кассир</strong> - может продавать билеты и просматривать посетителей</li>
-                    <li><strong>Администратор</strong> - полный доступ ко всем функции</li>
-                </ul>
+            <!-- Информационный блок -->
+            <div class="info-box">
+                <div class="info-icon">💡</div>
+                <div class="info-content">
+                    <h4>Роли в системе</h4>
+                    <ul>
+                        <li>
+                            <span class="role-badge user">👤 Пользователь</span>
+                            — ожидает назначения роли
+                        </li>
+                        <li>
+                            <span class="role-badge cashier">💳 Кассир</span>
+                            — продажа билетов, просмотр посетителей
+                        </li>
+                        <li>
+                            <span class="role-badge admin">👑 Администратор</span>
+                            — полный доступ ко всем функциям
+                        </li>
+                    </ul>
+                </div>
             </div>
             
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="submit" style="padding: 10px 20px; background: #007cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    ➕ Добавить сотрудника
+            <!-- Кнопки -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">
+                    ✅ Добавить сотрудника
                 </button>
-                <a href="{% url 'employees' %}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
-                    ↩️ Назад
+                <a href="{% url 'employees' %}" class="btn btn-secondary">
+                    ↩️ Отмена
                 </a>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    /* Страница формы */
+    .form-page {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    /* Заголовок формы */
+    .form-header {
+        margin-bottom: 25px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #0077B6;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+        color: #FF6B35;
+        transform: translateX(-5px);
+    }
+
+    .page-title {
+        margin: 0 0 8px 0;
+    }
+
+    .page-subtitle {
+        color: #666;
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* Карточка формы */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Секции формы */
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .section-icon {
+        font-size: 1.5rem;
+    }
+
+    .section-header h3 {
+        margin: 0;
+        color: #023E8A;
+        font-size: 1.2rem;
+    }
+
+    /* Сетка формы */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        color: #023E8A;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 14px 18px;
+        border: 2px solid #e8e8e8;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: 'Nunito', sans-serif;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #0077B6;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.1);
+    }
+
+    /* Ошибки полей */
+    .field-error {
+        margin-top: 8px;
+        padding: 10px 12px;
+        background: #fff5f5;
+        border-radius: 8px;
+        border-left: 3px solid #e74c3c;
+    }
+
+    .field-error span {
+        color: #c0392b;
+        font-size: 0.85rem;
+        display: block;
+    }
+
+    /* Информационный блок */
+    .info-box {
+        display: flex;
+        gap: 15px;
+        background: linear-gradient(135deg, #e8f4fd 0%, #d4ecfc 100%);
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 25px;
+        border: 2px solid #b8daff;
+    }
+
+    .info-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+    }
+
+    .info-content h4 {
+        margin: 0 0 12px 0;
+        color: #023E8A;
+        font-size: 1rem;
+    }
+
+    .info-content ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-content li {
+        padding: 8px 0;
+        font-size: 0.9rem;
+        color: #444;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    /* Бейджи ролей */
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .role-badge.user {
+        background: #f0f0f0;
+        color: #666;
+    }
+
+    .role-badge.cashier {
+        background: linear-gradient(135deg, #0077B6 0%, #023E8A 100%);
+        color: white;
+    }
+
+    .role-badge.admin {
+        background: linear-gradient(135deg, #FF6B35 0%, #f7931e 100%);
+        color: white;
+    }
+
+    /* Кнопки */
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .btn {
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        color: white;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 184, 148, 0.4);
+    }
+
+    .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #e0e0e0;
+        transform: translateY(-2px);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 600px) {
+        .form-card {
+            padding: 25px 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .info-box {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .info-content li {
+            justify-content: center;
+        }
+    }
+</style>
 {% endblock %}

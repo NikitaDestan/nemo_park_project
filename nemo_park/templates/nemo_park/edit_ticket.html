@@ -3,44 +3,445 @@
 {% block title %}Редактировать билет{% endblock %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 0 auto;">
-    <h2>✏️ Редактировать билет</h2>
+<div class="form-page">
+    <!-- Заголовок -->
+    <div class="form-header">
+        <a href="{% url 'tickets' %}" class="back-link">
+            ← Назад к билетам
+        </a>
+        <h2 class="page-title">✏️ Редактирование билета</h2>
+        <div class="ticket-badge">
+            <div class="ticket-icon-badge">
+                🎫
+            </div>
+            <div class="ticket-info">
+                <span class="ticket-visitor">{{ ticket.visitor.first_name }} {{ ticket.visitor.last_name }}</span>
+                <span class="ticket-type-label">
+                    {% if ticket.ticket_type == 'vip' %}👑 VIP всё включено
+                    {% elif ticket.ticket_type == 'family' %}👨‍👩‍👧 Семейный
+                    {% elif ticket.ticket_type == 'child' %}🧒 Детский
+                    {% elif ticket.ticket_type == 'water' %}🌊 Водная зона
+                    {% elif ticket.ticket_type == 'extreme' %}🎢 Экстрим-пакет
+                    {% else %}🎫 Взрослый
+                    {% endif %}
+                    • {{ ticket.price }} ₽
+                </span>
+            </div>
+        </div>
+    </div>
     
-    <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+    <!-- Форма -->
+    <div class="form-card ticket-card">
         <form method="post">
             {% csrf_token %}
             
-            {% for field in form %}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ field.label }}</label>
-                {{ field }}
-                {% if field.errors %}
-                <div style="color: red; font-size: 14px; margin-top: 5px;">
-                    {{ field.errors }}
+            <!-- Иконка -->
+            <div class="form-icon">
+                <span>🎟️</span>
+            </div>
+            
+            <!-- Поля формы -->
+            <div class="form-section">
+                <div class="form-grid">
+                    {% for field in form %}
+                    <div class="form-group {% if field.name == 'visitor' %}full-width{% endif %}">
+                        <label for="{{ field.id_for_label }}">
+                            {% if field.name == 'visitor' %}👤{% endif %}
+                            {% if field.name == 'ticket_type' %}🎟️{% endif %}
+                            {% if field.name == 'price' %}💰{% endif %}
+                            {% if field.name == 'valid_date' %}📅{% endif %}
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <div class="field-error">
+                            {% for error in field.errors %}
+                                <span>❌ {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endif %}
-            </div>
-            {% endfor %}
-            
-            <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <h4>💰 Цены на билеты:</h4>
-                <ul style="margin: 0;">
-                    <li>Взрослый: 1,500 руб.</li>
-                    <li>Детский: 800 руб.</li>
-                    <li>Семейный: 3,500 руб.</li>
-                    <li>VIP: 5,000 руб.</li>
-                </ul>
             </div>
             
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="submit" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            <!-- Прайс-лист -->
+            <div class="price-list">
+                <h4>💰 Прайс-лист парка «Немо»</h4>
+                <div class="price-grid">
+                    <div class="price-item adult">
+                        <span class="price-icon">🎫</span>
+                        <span class="price-name">Взрослый</span>
+                        <span class="price-value">1 500 ₽</span>
+                    </div>
+                    <div class="price-item child">
+                        <span class="price-icon">🧒</span>
+                        <span class="price-name">Детский</span>
+                        <span class="price-value">800 ₽</span>
+                    </div>
+                    <div class="price-item family">
+                        <span class="price-icon">👨‍👩‍👧</span>
+                        <span class="price-name">Семейный</span>
+                        <span class="price-value">3 500 ₽</span>
+                    </div>
+                    <div class="price-item vip">
+                        <span class="price-icon">👑</span>
+                        <span class="price-name">VIP всё включено</span>
+                        <span class="price-value">5 000 ₽</span>
+                    </div>
+                    <div class="price-item water">
+                        <span class="price-icon">🌊</span>
+                        <span class="price-name">Водная зона</span>
+                        <span class="price-value">1 200 ₽</span>
+                    </div>
+                    <div class="price-item extreme">
+                        <span class="price-icon">🎢</span>
+                        <span class="price-name">Экстрим-пакет</span>
+                        <span class="price-value">2 000 ₽</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Кнопки -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-warning">
                     💾 Сохранить изменения
                 </button>
-                <a href="{% url 'tickets' %}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
+                <a href="{% url 'tickets' %}" class="btn btn-secondary">
                     ↩️ Отмена
                 </a>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    /* Страница формы */
+    .form-page {
+        max-width: 650px;
+        margin: 0 auto;
+    }
+
+    /* Заголовок формы */
+    .form-header {
+        margin-bottom: 25px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #0077B6;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+        color: #FF6B35;
+        transform: translateX(-5px);
+    }
+
+    .page-title {
+        margin: 0 0 15px 0;
+    }
+
+    /* Бейдж билета */
+    .ticket-badge {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: linear-gradient(135deg, #fff8f0 0%, #fff3e6 100%);
+        padding: 15px 20px;
+        border-radius: 16px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        border: 2px solid #ffd9b3;
+    }
+
+    .ticket-icon-badge {
+        width: 55px;
+        height: 55px;
+        background: linear-gradient(135deg, #FF6B35 0%, #f7931e 100%);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+
+    .ticket-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .ticket-visitor {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #023E8A;
+    }
+
+    .ticket-type-label {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    /* Карточка формы */
+    .form-card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px 35px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-card.ticket-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #FF6B35, #f7931e, #ffd700, #00b4d8, #FF6B35);
+        background-size: 200% 100%;
+        animation: shimmer 3s linear infinite;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Иконка формы */
+    .form-icon {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .form-icon span {
+        font-size: 4rem;
+        display: inline-block;
+        animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    /* Секция формы */
+    .form-section {
+        margin-bottom: 25px;
+    }
+
+    /* Сетка формы */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        color: #023E8A;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 14px 18px;
+        border: 2px solid #e8e8e8;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: 'Nunito', sans-serif;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #FF6B35;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+    }
+
+    /* Ошибки полей */
+    .field-error {
+        margin-top: 8px;
+        padding: 10px 12px;
+        background: #fff5f5;
+        border-radius: 8px;
+        border-left: 3px solid #e74c3c;
+    }
+
+    .field-error span {
+        color: #c0392b;
+        font-size: 0.85rem;
+        display: block;
+    }
+
+    /* Прайс-лист */
+    .price-list {
+        background: linear-gradient(135deg, #fff8f0 0%, #fff3e6 100%);
+        border: 2px solid #ffd9b3;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .price-list h4 {
+        color: #FF6B35;
+        margin: 0 0 15px 0;
+        font-size: 1.1rem;
+        text-align: center;
+    }
+
+    .price-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .price-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        background: white;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+    }
+
+    .price-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Цвета для типов билетов */
+    .price-item.adult { border-color: #0077B6; }
+    .price-item.child { border-color: #e84393; background: linear-gradient(135deg, #fff0f8 0%, #ffe6f2 100%); }
+    .price-item.family { border-color: #00b894; background: linear-gradient(135deg, #e8fff5 0%, #d4f8eb 100%); }
+    .price-item.vip { border-color: #f7931e; background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%); }
+    .price-item.water { border-color: #00b4d8; background: linear-gradient(135deg, #e8f8ff 0%, #d4f1ff 100%); }
+    .price-item.extreme { border-color: #e74c3c; background: linear-gradient(135deg, #fff0f0 0%, #ffe6e6 100%); }
+
+    .price-icon {
+        font-size: 1.3rem;
+    }
+
+    .price-name {
+        flex: 1;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.8rem;
+    }
+
+    .price-value {
+        font-weight: 800;
+        font-size: 0.9rem;
+    }
+
+    /* Цвета цен */
+    .price-item.adult .price-value { color: #0077B6; }
+    .price-item.child .price-value { color: #e84393; }
+    .price-item.family .price-value { color: #00b894; }
+    .price-item.vip .price-value { color: #f7931e; }
+    .price-item.water .price-value { color: #00b4d8; }
+    .price-item.extreme .price-value { color: #e74c3c; }
+
+    /* Кнопки */
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .btn {
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: none;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #FF6B35 0%, #f7931e 100%);
+        color: white;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #e0e0e0;
+        transform: translateY(-2px);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 600px) {
+        .form-card {
+            padding: 30px 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .price-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .ticket-badge {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .form-icon span {
+            font-size: 3rem;
+        }
+    }
+</style>
 {% endblock %}

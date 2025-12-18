@@ -4,6 +4,6 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('nemo/', include('nemo_park.urls')),  
+    path('nemo/', include('nemo_park.urls')),
     path('', RedirectView.as_view(url='/nemo/login/')),  
 ]

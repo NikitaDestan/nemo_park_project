@@ -124,3 +124,76 @@ class Attraction(models.Model):
     class Meta:
         verbose_name = 'Аттракцион'
         verbose_name_plural = 'Аттракционы'
+    
+class Product(models.Model):
+    """Товары (еда и напитки)"""
+    CATEGORY_CHOICES = (
+        ('pizza', 'Пицца'),
+        ('burger', 'Бургеры'),
+        ('snack', 'Закуски'),
+        ('drink', 'Напитки'),
+        ('dessert', 'Десерты'),
+        ('combo', 'Комбо-наборы'),
+    )
+    
+    name = models.CharField(max_length=200, verbose_name='Название')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, verbose_name='Категория')
+    description = models.TextField(verbose_name='Описание', blank=True)
+    price = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='Цена')
+    image_emoji = models.CharField(max_length=10, default='🍽️', verbose_name='Иконка')
+    is_available = models.BooleanField(default=True, verbose_name='В наличии')
+    is_popular = models.BooleanField(default=False, verbose_name='Популярное')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Добавлено')
+    
+    def __str__(self):
+        return f"{self.image_emoji} {self.name} - {self.price} ₽"
+    
+    class Meta:
+        verbose_name = 'Товар'
+        verbose_name_plural = 'Товары'
+        ordering = ['category', 'name']
+
+
+class Order(models.Model):
+    """Заказы еды"""
+    STATUS_CHOICES = (
+        ('pending', 'В обработке'),
+        ('preparing', 'Готовится'),
+        ('ready', 'Готов'),
+        ('delivered', 'Выдан'),
+        ('cancelled', 'Отменён'),
+    )
+    
+    visitor = models.ForeignKey(Visitor, on_delete=models.CASCADE, verbose_name='Посетитель', null=True, blank=True)
+    products = models.ManyToManyField(Product, through='OrderItem', verbose_name='Товары')
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Итого')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='Статус')
+    cashier = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Кассир')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата заказа')
+    notes = models.TextField(blank=True, verbose_name='Примечания')
+    
+    def __str__(self):
+        return f"Заказ #{self.id} - {self.total_price} ₽"
+    
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'Заказы'
+        ordering = ['-created_at']
+
+
+class OrderItem(models.Model):
+    """Позиции в заказе"""
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name='Заказ')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Товар')
+    quantity = models.PositiveIntegerField(default=1, verbose_name='Количество')
+    price = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='Цена')
+    
+    def __str__(self):
+        return f"{self.product.name} x{self.quantity}"
+    
+    def get_total(self):
+        return self.price * self.quantity
+    
+    class Meta:
+        verbose_name = 'Позиция заказа'
+        verbose_name_plural = 'Позиции заказа'

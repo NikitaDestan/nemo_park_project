@@ -1,0 +1,53 @@
+{% extends 'nemo_park/base.html' %}
+
+{% block title %}Удалить заказ{% endblock %}
+
+{% block content %}
+<div class="delete-page">
+    <div class="delete-header">
+        <a href="{% url 'orders' %}" class="back-link">← Назад к заказам</a>
+    </div>
+    
+    <div class="delete-card">
+        <div class="delete-icon"><span>⚠️</span></div>
+        <h2 class="delete-title">Удаление заказа #{{ order.id }}</h2>
+        
+        <div class="order-summary">
+            <p><strong>Сумма:</strong> {{ order.total_price }} ₽</p>
+            <p><strong>Товаров:</strong> {{ order.orderitem_set.count }} шт.</p>
+            <p><strong>Дата:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+        </div>
+        
+        <div class="warning-box">
+            <div class="warning-item critical">
+                <span>❌</span>
+                <span>Это действие <strong>нельзя отменить!</strong></span>
+            </div>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="delete-actions">
+                <button type="submit" class="btn btn-danger">🗑️ Удалить</button>
+                <a href="{% url 'orders' %}" class="btn btn-secondary">↩️ Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .delete-page { max-width: 450px; margin: 0 auto; }
+    .delete-header { margin-bottom: 20px; }
+    .back-link { color: #0077B6; text-decoration: none; font-weight: 600; }
+    .delete-card { background: white; border-radius: 20px; padding: 40px; text-align: center; border: 3px solid #fee2e2; }
+    .delete-icon span { font-size: 4rem; }
+    .delete-title { color: #c0392b; margin: 20px 0; }
+    .order-summary { background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: left; }
+    .warning-box { background: #fff5f5; border: 2px solid #feb2b2; border-radius: 12px; padding: 15px; margin-bottom: 25px; }
+    .warning-item { display: flex; align-items: center; gap: 10px; color: #c0392b; font-weight: 600; }
+    .delete-actions { display: flex; gap: 15px; }
+    .btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; text-align: center; text-decoration: none; }
+    .btn-danger { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+    .btn-secondary { background: #f0f0f0; color: #333; }
+</style>
+{% endblock %}
